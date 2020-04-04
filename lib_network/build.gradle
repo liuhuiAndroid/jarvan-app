@@ -1,6 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.alibaba.arouter'
 
 android {
     compileSdkVersion 29
@@ -25,6 +27,12 @@ android {
 
 }
 
+kapt {
+    arguments {
+        arg("AROUTER_MODULE_NAME", project.getName())
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -39,4 +47,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.14.7'
 
     compileOnly project(':lib_common')
+
+    compileOnly('com.alibaba:arouter-api:1.5.0')
+    kapt 'com.alibaba:arouter-compiler:1.5.0'
 }
