@@ -1,0 +1,6 @@
+rootProject.name='jarvan-app'
+include ':app'
+include ':lib_network'
+include ':lib_video'
+include ':lib_common'
+include ':lib_image_loader'
