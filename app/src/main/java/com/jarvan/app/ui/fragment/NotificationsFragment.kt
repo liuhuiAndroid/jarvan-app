@@ -1,4 +1,4 @@
-package com.jarvan.app.ui.notifications
+package com.jarvan.app.ui.fragment
 
 import android.net.Uri
 import android.os.Bundle
@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.jarvan.app.databinding.FragmentNotificationsBinding
+import com.jarvan.app.viewmodels.NotificationsViewModel
 
 private const val videoUrl = "https://video.acadsoc.com.cn/WinfromUploads/video/2019-07-16/2019071614514172.mp4"
 

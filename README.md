@@ -7,3 +7,19 @@
 - Kodein
 
 项目中所有引入的依赖都得说出为什么需要使用
+-------------------------------------------
+
+网络库
+图片库
+视频库
+ARouter
+Kodein
+
+WorkManager
+ViewModel
+Room
+Paging
+Navigation
+LiveData
+Lifecycle
+DataBinding

@@ -1,4 +1,4 @@
-package com.jarvan.app.ui.notifications
+package com.jarvan.app.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
