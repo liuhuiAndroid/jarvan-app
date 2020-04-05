@@ -74,4 +74,12 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.2'
+    implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.2'
+
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.paging:paging-runtime-ktx:2.1.1'
+    testImplementation "androidx.paging:paging-common-ktx:2.1.1"
+
 }

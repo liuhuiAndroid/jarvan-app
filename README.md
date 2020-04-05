@@ -16,10 +16,10 @@ ARouter
 Kodein
 
 WorkManager
-ViewModel
 Room
 Paging
 Navigation
-LiveData
 Lifecycle
+ViewModel
+LiveData
 DataBinding
