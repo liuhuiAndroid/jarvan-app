@@ -26,7 +26,7 @@ object HttpRepository {
             writeTimeout(5, TimeUnit.MINUTES)
             readTimeout((60 * 3), TimeUnit.SECONDS)
             addInterceptor(provideLoggingInterceptor())
-//            addInterceptor(provideHeaderInterceptor())
+            addInterceptor(provideHeaderInterceptor())
         }.build()
 
     private fun provideLoggingInterceptor(): HttpLoggingInterceptor =
