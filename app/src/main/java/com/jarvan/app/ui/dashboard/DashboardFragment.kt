@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.alibaba.android.arouter.launcher.ARouter
 import com.jarvan.app.User
 import com.jarvan.app.databinding.FragmentDashboardBinding
 
@@ -22,6 +23,9 @@ class DashboardFragment : Fragment() {
             ViewModelProviders.of(this).get(DashboardViewModel::class.java)
         val fragmentDashboardBinding = FragmentDashboardBinding.inflate(inflater, container, false)
         fragmentDashboardBinding.user = User("https://img1.sycdn.imooc.com/5af93c7b000156ab02600260-160-160.jpg", true)
+        fragmentDashboardBinding.mAvatar.setOnClickListener {
+            ARouter.getInstance().build("/webview/test_activity").navigation()
+        }
         return fragmentDashboardBinding.root
     }
 }

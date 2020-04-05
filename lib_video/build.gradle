@@ -47,5 +47,5 @@ dependencies {
     api 'com.google.android.exoplayer:exoplayer-ui:2.11.3'
 
     compileOnly('com.alibaba:arouter-api:1.5.0')
-    kapt 'com.alibaba:arouter-compiler:1.5.0'
+    kapt 'com.alibaba:arouter-compiler:1.2.2'
 }

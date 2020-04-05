@@ -1,7 +1,9 @@
 package com.jarvan.lib_network
 
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 val retrofit: Retrofit by lazy {
@@ -11,8 +13,8 @@ val retrofit: Retrofit by lazy {
             .connectTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(5, TimeUnit.MINUTES)
             .readTimeout((60 * 3), TimeUnit.SECONDS)
-//            .addNetworkInterceptor(HttpLoggingInterceptor { Timber.i(it) }
-//                .setLevel(HttpLoggingInterceptor.Level.BODY))
+            .addNetworkInterceptor(HttpLoggingInterceptor { Timber.i(it) }
+                .setLevel(HttpLoggingInterceptor.Level.BODY))
             .addInterceptor {
                 var timestamp = System.currentTimeMillis().toString()
                 val request = it.request().newBuilder()
