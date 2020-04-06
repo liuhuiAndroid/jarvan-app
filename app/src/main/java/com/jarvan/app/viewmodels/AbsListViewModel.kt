@@ -8,17 +8,17 @@ import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 
-open abstract class AbsListViewModel<T> : ViewModel() {
+open abstract class AbsListViewModel<T> : BaseViewModel() {
 
-    private val myPagingConfig = Config(
+    val myPagingConfig = Config(
         pageSize = 10,
         initialLoadSizeHint = 12,
         enablePlaceholders = false
     )
 
-    private lateinit var dataSource: DataSource<Int, T>
+    lateinit var dataSource: DataSource<Int, T>
 
-    private val boundaryPageData = MutableLiveData<Boolean>()
+    val boundaryPageData = MutableLiveData<Boolean>()
 
     private var factory: DataSource.Factory<Int, T> =
         object : DataSource.Factory<Int, T>() {
@@ -53,7 +53,7 @@ open abstract class AbsListViewModel<T> : ViewModel() {
         }
     }
 
-    var pageData: LiveData<PagedList<T>>? = LivePagedListBuilder(factory, myPagingConfig)
+    var pageData: LiveData<PagedList<T>> = LivePagedListBuilder(factory, myPagingConfig)
         .setInitialLoadKey(0)
         .setBoundaryCallback(callback)
         .build()

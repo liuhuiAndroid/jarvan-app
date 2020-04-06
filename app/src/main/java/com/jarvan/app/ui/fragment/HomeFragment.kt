@@ -4,17 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.paging.PagedList
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.jarvan.app.adapters.HomeAdapter
+import com.jarvan.lib_network.data.Feed
 import com.jarvan.app.databinding.FragmentHomeBinding
+import com.jarvan.app.ui.AbsListFragment
 import com.jarvan.app.viewmodels.HomeViewModel
+import com.scwang.smartrefresh.layout.api.RefreshLayout
 import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener
 
-class HomeFragment : Fragment() {
+class HomeFragment : AbsListFragment<Feed, HomeViewModel>() {
 
-    private lateinit var homeViewModel: HomeViewModel
     private lateinit var fragmentHomeBinding: FragmentHomeBinding
 
     override fun onCreateView(
@@ -22,19 +25,27 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
         fragmentHomeBinding = FragmentHomeBinding.inflate(inflater, container, false)
         return fragmentHomeBinding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        fragmentHomeBinding.refreshLayout.setOnRefreshListener(OnRefreshListener { refreshLayout ->
-            refreshLayout.finishRefresh()
-        })
-        fragmentHomeBinding.refreshLayout.setOnLoadMoreListener(OnLoadMoreListener { refreshLayout ->
-            refreshLayout.finishLoadMore()
-        })
+    /**
+     * 上拉分页，paging帮忙处理，但是如果数据返回为空，不会再次分页，需要手动加载
+     */
+    override fun onLoadMore(refreshLayout: RefreshLayout) {
+
+    }
+
+    override fun onRefresh(refreshLayout: RefreshLayout) {
+        //invalidate 之后Paging会重新创建一个DataSource 重新调用它的loadInitial方法加载初始化数据
+        //详情见：LivePagedListBuilder#compute方法
+        mViewModel.dataSource.invalidate()
+    }
+
+    override fun getAdapter(): PagedListAdapter<Feed, RecyclerView.ViewHolder> {
+        return object : HomeAdapter() {
+
+        } as PagedListAdapter<Feed, RecyclerView.ViewHolder>
     }
 
 }
