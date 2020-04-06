@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken
 import com.jarvan.lib_network.HttpRepository
 import com.jarvan.lib_network.data.Feed
 import timber.log.Timber
+import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
 
 class HomeViewModel : AbsListViewModel<Feed>() {
@@ -63,14 +64,18 @@ class HomeViewModel : AbsListViewModel<Feed>() {
         // =============================
         request(
             execute = {
-                val response =
-                    HttpRepository.getApiService().getHotFeedsList("all", key, 0, count)
-                val data = if (response.body == null) emptyList() else response.body
-                callback.onResult(data as List<Feed>)
-                if (key > 0) {
-                    loadAfter.set(false)
+                try {
+                    val response =
+                        HttpRepository.getApiService().getHotFeedsList("all", key, 1580651461, count)
+                    val data = if (response.data?.data == null) emptyList() else response.data?.data
+                    callback.onResult(data as List<Feed>)
+                    if (key > 0) {
+                        loadAfter.set(false)
+                    }
+                    Timber.i("loadData: key:$key")
+                }catch (e:Exception){
+                    e.printStackTrace()
                 }
-                Timber.i("loadData: key:$key")
             }
         )
     }

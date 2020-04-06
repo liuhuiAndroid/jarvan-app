@@ -12,6 +12,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.androidXModule
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
+import timber.log.Timber
 
 class JarvanApplication : Application(), KodeinAware {
 
@@ -19,6 +20,8 @@ class JarvanApplication : Application(), KodeinAware {
         super.onCreate()
         // ARouter初始化
         ARouter.init(this)
+
+        Timber.plant(Timber.DebugTree())
     }
 
     override val kodein by Kodein.lazy {

@@ -30,10 +30,10 @@ object HttpRepository {
         }.build()
 
     private fun provideLoggingInterceptor(): HttpLoggingInterceptor =
-        HttpLoggingInterceptor() {
+        HttpLoggingInterceptor(HttpLoggingInterceptor.Logger {
             Timber.i(it)
-        }.apply {
-            level = HttpLoggingInterceptor.Level.BODY
+        }).apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
         }
 
     private fun provideHeaderInterceptor(): Interceptor =
@@ -44,4 +44,5 @@ object HttpRepository {
                 .build()
             it.proceed(request)
         }
+
 }

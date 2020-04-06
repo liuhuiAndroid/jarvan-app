@@ -24,7 +24,7 @@ import java.lang.reflect.ParameterizedType
 open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnLoadMoreListener,
     OnRefreshListener {
 
-    private lateinit var layoutRefreshViewBinding: LayoutRefreshViewBinding
+    lateinit var layoutRefreshViewBinding: LayoutRefreshViewBinding
 
     private lateinit var pagedListAdapter: PagedListAdapter<T, RecyclerView.ViewHolder>
 

@@ -7,5 +7,6 @@ class Feed : BaseObservable(), Serializable {
 
     var id = 0
 
-    var url: String = "null"
+    var feeds_text: String = "null"
+
 }
