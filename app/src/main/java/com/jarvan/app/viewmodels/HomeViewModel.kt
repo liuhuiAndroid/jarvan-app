@@ -3,11 +3,14 @@ package com.jarvan.app.viewmodels
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.arch.core.executor.ArchTaskExecutor
+import androidx.lifecycle.viewModelScope
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
 import com.google.gson.reflect.TypeToken
 import com.jarvan.lib_network.HttpRepository
 import com.jarvan.lib_network.data.Feed
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
@@ -52,6 +55,7 @@ class HomeViewModel : AbsListViewModel<Feed>() {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private fun loadData(
         key: Int,
         count: Int,
@@ -62,22 +66,22 @@ class HomeViewModel : AbsListViewModel<Feed>() {
         }
         // 可以先加载缓存，暂时不实现
         // =============================
-        request(
-            execute = {
-                try {
-                    val response =
-                        HttpRepository.getApiService().getHotFeedsList("all", key, 1580651461, count)
-                    val data = if (response.data?.data == null) emptyList() else response.data?.data
-                    callback.onResult(data as List<Feed>)
-                    if (key > 0) {
-                        loadAfter.set(false)
-                    }
-                    Timber.i("loadData: key:$key")
-                }catch (e:Exception){
-                    e.printStackTrace()
+        try {
+            val call =
+                HttpRepository.getApiService().getHotFeedsList("all", key, 1580651461, count)
+            val response = call.execute().body()
+            response?.let {
+                it.data?.data?.let { it ->
+                    callback.onResult(it)
                 }
             }
-        )
+            if (key > 0) {
+                loadAfter.set(false)
+            }
+            Timber.i("loadData: key:$key")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @SuppressLint("RestrictedApi")

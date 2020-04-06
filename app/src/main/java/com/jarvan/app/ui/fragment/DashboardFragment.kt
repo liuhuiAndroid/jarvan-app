@@ -48,7 +48,7 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dashboardViewModel.fetchRepos()
+        // dashboardViewModel.fetchRepos()
     }
 
 }

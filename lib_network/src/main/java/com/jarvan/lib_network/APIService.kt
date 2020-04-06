@@ -2,8 +2,8 @@ package com.jarvan.lib_network
 
 import com.jarvan.lib_network.data.Feed
 import com.jarvan.lib_network.data.Weather
+import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface APIService {
@@ -17,9 +17,11 @@ interface APIService {
 
 
     @GET("feeds/queryHotFeedsList")
-    suspend fun getHotFeedsList(@Query("feedType") feedType: String,
-                                @Query("feedId") feedId: Int,
-                                @Query("userId") userId: Int,
-                                @Query("pageCount") pageCount: Int): APIResponse<List<Feed>>
+    fun getHotFeedsList(
+        @Query("feedType") feedType: String,
+        @Query("feedId") feedId: Int,
+        @Query("userId") userId: Int,
+        @Query("pageCount") pageCount: Int
+    ): Call<APIResponse<List<Feed>>>
 
 }
