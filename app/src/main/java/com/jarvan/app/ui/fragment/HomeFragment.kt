@@ -11,6 +11,11 @@ import com.jarvan.app.viewmodels.HomeViewModel
 import com.jarvan.lib_network.data.Feed
 import com.scwang.smartrefresh.layout.api.RefreshLayout
 
+/**
+ * Android分页框架Paging源码分析：https://blog.csdn.net/xiatiandefeiyu/article/details/85002160
+ * Paging适合管理无限列表
+ * Paging官方文档：https://developer.android.google.cn/topic/libraries/architecture/paging
+ */
 class HomeFragment : AbsListFragment<Feed, HomeViewModel>() {
 
     /**

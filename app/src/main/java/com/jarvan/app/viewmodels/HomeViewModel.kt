@@ -40,18 +40,18 @@ class HomeViewModel : AbsListViewModel<Feed>() {
             params: LoadInitialParams<Int>,
             callback: LoadInitialCallback<Feed>
         ) {
-            // 加载初始化数据的
+            // 加载初始化数据
             // requestedLoadSize：Requested number of items to load.
             loadData(0, params.requestedLoadSize, callback)
         }
 
         override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Feed>) {
-            // 向后加载分页数据的
+            // 向后加载分页数据
             loadData(params.key, params.requestedLoadSize, callback)
         }
 
         override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Feed>) {
-            // 能够向前加载数据的
+            // 向前加载数据
             callback.onResult(emptyList())
         }
 

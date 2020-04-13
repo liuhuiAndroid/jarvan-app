@@ -52,6 +52,7 @@ open abstract class AbsListViewModel<T> : BaseViewModel() {
 
         // LivePagedListBuilder：将PagedList和LiveData整合成LiveData<PagedList>
         // LivePageListBuilder 此类是从 DataSource.Factory 构建 LiveData<PagedList>
+        // 用LivePagedListBuilder类构建LiveData类：让数据和Activity或Fragment的生命周期绑定
         pageData = LivePagedListBuilder(factory, myPagingConfig)
             .setInitialLoadKey(0)
             .setBoundaryCallback(callback)

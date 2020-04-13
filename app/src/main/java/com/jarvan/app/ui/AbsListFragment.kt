@@ -43,7 +43,9 @@ open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnL
         layoutRefreshViewBinding.refreshLayout.setOnLoadMoreListener(this)
 
         pagedListAdapter = getAdapter()
+        genericViewModel()
         layoutRefreshViewBinding.recyclerView.adapter = pagedListAdapter
+
         val linearLayoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.VERTICAL,
@@ -59,7 +61,6 @@ open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnL
         }
         layoutRefreshViewBinding.recyclerView.addItemDecoration(decoration)
 
-        genericViewModel()
         return layoutRefreshViewBinding.root
     }
 
@@ -71,7 +72,7 @@ open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnL
             val argument = arguments[1]
             val modelClazz: Class<M> = (argument as Class<M>)
             mViewModel = ViewModelProvider(requireActivity())[modelClazz]
-            //触发页面初始化数据加载的逻辑
+            // 实现LiveData的的observe的方法注册观察者回调
             mViewModel.pageData.observe(viewLifecycleOwner, Observer {
                 submitList(it)
             })
