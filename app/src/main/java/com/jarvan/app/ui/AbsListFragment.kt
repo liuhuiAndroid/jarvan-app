@@ -26,7 +26,7 @@ open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnL
 
     lateinit var layoutRefreshViewBinding: LayoutRefreshViewBinding
 
-    private lateinit var pagedListAdapter: PagedListAdapter<T, RecyclerView.ViewHolder>
+    lateinit var pagedListAdapter: PagedListAdapter<T, RecyclerView.ViewHolder>
 
     lateinit var mViewModel: M
 
@@ -99,7 +99,7 @@ open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnL
         var hasData = hasData
         val currentList: PagedList<T>? = pagedListAdapter.currentList
         hasData = hasData || currentList != null && currentList.size > 0
-        val state: RefreshState = layoutRefreshViewBinding.refreshLayout.getState()
+        val state: RefreshState = layoutRefreshViewBinding.refreshLayout.state
         if (state.isFooter && state.isOpening) {
             layoutRefreshViewBinding.refreshLayout.finishLoadMore()
         } else if (state.isHeader && state.isOpening) {

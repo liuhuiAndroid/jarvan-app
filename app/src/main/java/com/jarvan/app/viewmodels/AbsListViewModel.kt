@@ -10,19 +10,21 @@ import androidx.paging.PagedList
 open abstract class AbsListViewModel<T> : BaseViewModel() {
 
     val myPagingConfig = Config(
-        pageSize = 10,
-        initialLoadSizeHint = 12,
+        pageSize = 2,
+        initialLoadSizeHint = 2,
         enablePlaceholders = false
     )
 
+    // 数据源
     var dataSource: DataSource<Int, T>? = null
 
+    // PagedList：一个继承了 AbstractList 的 List 子类， 包括了数据源获取的数据
     var pageData: LiveData<PagedList<T>>
 
     val boundaryPageData = MutableLiveData<Boolean>()
 
     init {
-        // PagedList数据被加载的边界回调Callback
+        // DataSource中的数据加载到边界时的回调Callback
         // 但不是每一次分页都会回调这里，具体请看ContiguousPagedList#mReceiver#onPageResult
         // deferBoundaryCallbacks
         var callback: PagedList.BoundaryCallback<T> = object : PagedList.BoundaryCallback<T>() {
@@ -48,6 +50,8 @@ open abstract class AbsListViewModel<T> : BaseViewModel() {
                 }
             }
 
+        // LivePagedListBuilder：将PagedList和LiveData整合成LiveData<PagedList>
+        // LivePageListBuilder 此类是从 DataSource.Factory 构建 LiveData<PagedList>
         pageData = LivePagedListBuilder(factory, myPagingConfig)
             .setInitialLoadKey(0)
             .setBoundaryCallback(callback)
