@@ -17,11 +17,16 @@ import com.jarvan.app.R
 import com.jarvan.app.databinding.LayoutRefreshViewBinding
 import com.jarvan.app.viewmodels.AbsListViewModel
 import com.scwang.smartrefresh.layout.constant.RefreshState
+import com.scwang.smartrefresh.layout.constant.SpinnerStyle
+import com.scwang.smartrefresh.layout.footer.BallPulseFooter
+import com.scwang.smartrefresh.layout.footer.ClassicsFooter
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader
+import com.scwang.smartrefresh.layout.header.ClassicsHeader
 import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener
 import java.lang.reflect.ParameterizedType
 
-open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnLoadMoreListener,
+open abstract class AbsListFragment<T, M : AbsListViewModel<T>> : Fragment(), OnLoadMoreListener,
     OnRefreshListener {
 
     lateinit var layoutRefreshViewBinding: LayoutRefreshViewBinding
@@ -56,7 +61,7 @@ open abstract class AbsListFragment<T, M : AbsListViewModel<T>>: Fragment(), OnL
 
         //默认给列表中的Item 一个 10dp的ItemDecoration
         var decoration = DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
-        getDrawable(requireContext(),R.drawable.list_divider)?.let {
+        getDrawable(requireContext(), R.drawable.list_divider)?.let {
             decoration.setDrawable(it)
         }
         layoutRefreshViewBinding.recyclerView.addItemDecoration(decoration)

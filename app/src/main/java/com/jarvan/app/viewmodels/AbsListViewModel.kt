@@ -10,8 +10,8 @@ import androidx.paging.PagedList
 open abstract class AbsListViewModel<T> : BaseViewModel() {
 
     val myPagingConfig = Config(
-        pageSize = 2,
-        initialLoadSizeHint = 2,
+        pageSize = 8,
+        initialLoadSizeHint = 8,
         enablePlaceholders = false
     )
 
@@ -46,7 +46,8 @@ open abstract class AbsListViewModel<T> : BaseViewModel() {
         var factory: DataSource.Factory<Int, T> =
             object : DataSource.Factory<Int, T>() {
                 override fun create(): DataSource<Int, T> {
-                    return createDataSource()
+                    dataSource = createDataSource()
+                    return dataSource!!
                 }
             }
 

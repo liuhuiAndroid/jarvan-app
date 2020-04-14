@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Environment
 import com.alibaba.android.arouter.launcher.ARouter
+import com.jarvan.app.utilities.DynamicTimeFormat
 import com.scwang.smartrefresh.layout.SmartRefreshLayout
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import com.scwang.smartrefresh.layout.header.ClassicsHeader
@@ -16,7 +17,6 @@ import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
 import timber.log.Timber
 import java.io.File
-
 
 class JarvanApplication : Application(), KodeinAware {
 
@@ -35,14 +35,9 @@ class JarvanApplication : Application(), KodeinAware {
 
     init {
         //设置全局的Header构建器
-        SmartRefreshLayout.setDefaultRefreshHeaderCreator { context, layout ->
-            layout.setPrimaryColorsId(R.color.white, R.color.white)
-            ClassicsHeader(context)
-        }
+        SmartRefreshLayout.setDefaultRefreshHeaderCreator { context, _ -> ClassicsHeader(context) }
         //设置全局的Footer构建器
-        SmartRefreshLayout.setDefaultRefreshFooterCreator { context, _ ->
-            ClassicsFooter(context).setDrawableSize(20f)
-        }
+        SmartRefreshLayout.setDefaultRefreshFooterCreator { context, _ -> ClassicsFooter(context) }
     }
 
 }

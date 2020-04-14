@@ -46,8 +46,13 @@ class HomeFragment : AbsListFragment<Feed, HomeViewModel>() {
                         val pagedList: PagedList<Feed> = dataSource.buildNewPagedList(config)
                         submitList(pagedList)
                         layoutRefreshViewBinding.refreshLayout.setEnableLoadMore(true)
-                    }else{
+                    } else {
                         layoutRefreshViewBinding.refreshLayout.setEnableLoadMore(false)
+                    }
+                    if (layoutRefreshViewBinding.refreshLayout.state.isFooter
+                        && layoutRefreshViewBinding.refreshLayout.state.isOpening
+                    ) {
+                        layoutRefreshViewBinding.refreshLayout.finishLoadMore()
                     }
                 }
             })
