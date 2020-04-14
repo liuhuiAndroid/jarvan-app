@@ -3,16 +3,20 @@ package com.jarvan.app
 import android.R
 import android.app.Application
 import android.content.Context
+import android.os.Environment
 import com.alibaba.android.arouter.launcher.ARouter
 import com.scwang.smartrefresh.layout.SmartRefreshLayout
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import com.scwang.smartrefresh.layout.header.ClassicsHeader
+import okio.Okio
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.androidXModule
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
 import timber.log.Timber
+import java.io.File
+
 
 class JarvanApplication : Application(), KodeinAware {
 
@@ -41,4 +45,16 @@ class JarvanApplication : Application(), KodeinAware {
         }
     }
 
+    fun writeEnv(file: File) {
+        Okio.sink(file).use { fileSink ->
+            Okio.buffer(fileSink).use { bufferedSink ->
+                for ((key, value) in System.getenv()) {
+                    bufferedSink.writeUtf8(key)
+                    bufferedSink.writeUtf8("=")
+                    bufferedSink.writeUtf8(value)
+                    bufferedSink.writeUtf8("\n")
+                }
+            }
+        }
+    }
 }
