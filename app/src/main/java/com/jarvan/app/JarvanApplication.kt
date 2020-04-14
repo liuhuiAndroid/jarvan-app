@@ -45,16 +45,4 @@ class JarvanApplication : Application(), KodeinAware {
         }
     }
 
-    fun writeEnv(file: File) {
-        Okio.sink(file).use { fileSink ->
-            Okio.buffer(fileSink).use { bufferedSink ->
-                for ((key, value) in System.getenv()) {
-                    bufferedSink.writeUtf8(key)
-                    bufferedSink.writeUtf8("=")
-                    bufferedSink.writeUtf8(value)
-                    bufferedSink.writeUtf8("\n")
-                }
-            }
-        }
-    }
 }
