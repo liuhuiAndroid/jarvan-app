@@ -1,6 +1,7 @@
 package com.jarvan.lib_network
 
 import com.google.gson.GsonBuilder
+import com.jarvan.lib_network.data.Weather
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -10,6 +11,19 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 object HttpRepository {
+
+    /**
+     * 数据脱壳与错误预处理
+     */
+    fun <T> preprocessData(responseBody: APIResponse<T>): T {
+        return if (responseBody.status == 0) responseBody.data.data
+        else throw Throwable(responseBody.message)
+    }
+
+    suspend fun getWeather(): Weather {
+        val responseBody = getApiService().getWeather()
+        return preprocessData(responseBody)
+    }
 
     open fun getApiService(): APIService {
         return Retrofit.Builder()

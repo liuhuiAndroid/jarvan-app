@@ -1,19 +1,22 @@
 package com.jarvan.app.viewmodels
 
+import android.widget.Toast
+import androidx.lifecycle.ViewModel
 import com.jarvan.app.base.BaseLiveData
 import com.jarvan.lib_network.HttpRepository
 import com.jarvan.lib_network.data.Weather
+import com.jarvan.lib_network.launch
 
-class DashboardViewModel : BaseViewModel() {
+class DashboardViewModel :ViewModel() {
 
     val repoResult = BaseLiveData<Weather>()
 
     fun fetchRepos() {
-        request(
-            execute = {
-                val result = HttpRepository.getApiService().getWeather()
-                repoResult.update(result)
-            }
-        )
+        launch({
+            val result = HttpRepository.getWeather()
+            repoResult.update(result)
+        },{
+            it.printStackTrace()
+        })
     }
 }

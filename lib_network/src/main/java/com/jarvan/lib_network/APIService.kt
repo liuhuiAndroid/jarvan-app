@@ -12,9 +12,8 @@ interface APIService {
         const val API_BASE_SERVER_URL = "http://123.56.232.18:8080/serverdemo/"
     }
 
-    @GET("zaihuishou/Kotlin-mvvm/master/data.json")
-    suspend fun getWeather(): Weather
-
+    @GET("https://www.tianqiapi.com/api/?appid=23035354&appsecret=8YvlPNrz&version=v9&cityid=0&city=%E9%9D%92%E5%B2%9B&ip=0&callback=0")
+    suspend fun getWeather(): APIResponse<Weather>
 
     @GET("feeds/queryHotFeedsList")
     fun getHotFeedsList(

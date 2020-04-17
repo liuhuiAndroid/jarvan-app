@@ -39,16 +39,16 @@ class DashboardFragment : Fragment() {
         fragmentDashboardBinding.mAvatar.setOnClickListener {
             ARouter.getInstance().build("/webview/test_activity").navigation()
         }
-        fragmentDashboardBinding.mTextDashboard.text = dashboardViewModel.repoResult.value?.cityInfo.toString()
+        fragmentDashboardBinding.mTextDashboard.text = dashboardViewModel.repoResult.value.toString()
         dashboardViewModel.repoResult.observe(viewLifecycleOwner, Observer {
-            fragmentDashboardBinding.mTextDashboard.text = it?.cityInfo.toString()
+            fragmentDashboardBinding.mTextDashboard.text = it.toString()
         })
         return fragmentDashboardBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // dashboardViewModel.fetchRepos()
+         dashboardViewModel.fetchRepos()
     }
 
 }

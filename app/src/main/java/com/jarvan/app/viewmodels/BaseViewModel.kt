@@ -8,6 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+/**
+ * @Deprecated please use ViewModelExt instead
+ */
 open class BaseViewModel : ViewModel() {
 
     fun <T> request(
