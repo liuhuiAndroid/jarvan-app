@@ -14,12 +14,12 @@ import org.junit.Assert.*
  */
 class CoroutinesUnitTest {
 
-    companion object{
+    companion object {
         private const val TAG = "CoroutinesUnitTest"
     }
 
     @Test
-    fun test0(){
+    fun test0() {
         GlobalScope.launch {
             delay(1000L)
             println("Hello,World!")
@@ -28,9 +28,9 @@ class CoroutinesUnitTest {
     }
 
     @Test
-    fun test1(){
+    fun test1() {
         runBlocking {
-            repeat(100_000){
+            repeat(100_000) {
                 launch {
                     delay(1000L)
                     print(".")
@@ -40,7 +40,7 @@ class CoroutinesUnitTest {
     }
 
     @Test
-    fun test2(){
+    fun test2() {
         // GlobalScope.launch就是创建一个协程环境并且启动一个协程
         GlobalScope.launch {
 
@@ -53,13 +53,13 @@ class CoroutinesUnitTest {
         job.cancel()
         // newSingleThreadContext("MyThread")是更换协程上下文环境
         // 协程上下文包括了一个协程调度器
-        GlobalScope.launch(newSingleThreadContext("MyThread")){
+        GlobalScope.launch(newSingleThreadContext("MyThread")) {
             // 在一个协程环境中，执行后台耗时操作
         }
     }
 
     @Test
-    fun test3(){
+    fun test3() {
         GlobalScope.launch() {
             val result = async {
                 // 耗时操作
@@ -72,7 +72,7 @@ class CoroutinesUnitTest {
     }
 
     @Test
-    fun test4(){
+    fun test4() {
         GlobalScope.launch {
             println("Hello ${Thread.currentThread().name}")
             testChild()
@@ -81,8 +81,8 @@ class CoroutinesUnitTest {
         Thread.sleep(5000)
     }
 
-    private suspend fun testChild(){
-        withContext(Dispatchers.IO){
+    private suspend fun testChild() {
+        withContext(Dispatchers.IO) {
             println("World ${Thread.currentThread().name}")
         }
     }
@@ -91,7 +91,9 @@ class CoroutinesUnitTest {
     // Kotlin 语言中文站官方示例 - Start
     // ===========================================================================
 
+    // ---------------------------------------------------------------------------
     // 协程基础
+    // ---------------------------------------------------------------------------
     @Test
     fun testKotlinCouroutines001() {
         GlobalScope.launch { // 在后台启动一个新的协程并继续
@@ -134,7 +136,6 @@ class CoroutinesUnitTest {
         println("Hello,")
         job.join() // 等待直到子协程执行结束
     }
-
 
     @Test
     fun testKotlinCoroutine005() = runBlocking {
@@ -193,6 +194,45 @@ class CoroutinesUnitTest {
             }
         }
         delay(1300L) // 在延迟后退出
+    }
+
+    // ---------------------------------------------------------------------------
+    // 取消与超时
+    // ---------------------------------------------------------------------------
+
+    @Test
+    fun testKotlinCoroutine100() = runBlocking {
+        val job = launch {
+            repeat(1000) { i ->
+                println("job: I'm sleeping $i ...")
+                delay(500L)
+            }
+        }
+        delay(1300L) // 延迟一段时间
+        println("main: I'm tired of waiting!")
+        job.cancel() // 取消该作业
+        job.join() // 等待作业执行结束
+        println("main: Now I can quit.")
+    }
+
+    @Test
+    fun testKotlinCoroutine101() = runBlocking {
+        val startTime = System.currentTimeMillis()
+        val job = launch(Dispatchers.Default) {
+            var nextPrintTime = startTime
+            var i = 0
+            while (i < 5) { // 一个执行计算的循环，只是为了占用 CPU
+                // 每秒打印消息两次
+                if (System.currentTimeMillis() >= nextPrintTime) {
+                    println("job: I'm sleeping ${i++} ...")
+                    nextPrintTime += 500L
+                }
+            }
+        }
+        delay(1300L) // 等待一段时间
+        println("main: I'm tired of waiting!")
+        job.cancelAndJoin() // 取消一个作业并且等待它结束
+        println("main: Now I can quit.")
     }
 
     // ===========================================================================
