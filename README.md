@@ -42,6 +42,8 @@ https://blog.csdn.net/NJP_NJP/article/details/103524778
 [Kotlin协程的挂起](https://kaixue.io/kotlin-coroutines-2/)
 [什么是「非阻塞式」挂起](https://kaixue.io/kotlin-coroutines-3/)
 [Kotlin 协程实战训练营](https://ke.qq.com/course/2204707)
+[Kotlin 协程实战训练营 笔记](./doc/Kotlin协程实战训练.md)
 Lambda表达式
+
 [Kotlin的Lambda表达式](https://kaixue.io/kotlin-lambda/)
 -------------------------------------------
