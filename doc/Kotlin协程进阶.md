@@ -290,3 +290,38 @@
   - collectLatest：新值发送时取消之前的
 
 ###### 案例：协程在 Android 中的应用
+
+- 协程实现对话框
+
+  ```
+  suspend fun Context.alert(title:String,message: String): Boolean = suspendCancellableCoroutine{
+      continuation ->
+      
+      AlertDialog.Builder(this)
+      	.setNegativeButton("No"){ dialog, _->
+              dialog.dismiss()
+              continuation.resume(false)
+      	}
+      	.setPositiveButton("Yes"){ dialog, _->
+              dialog.dismiss()
+              continuation.resume(true)
+      	}
+      	.setTitle(title)
+      	.setMessage(message)
+      	.setOnCancelListener{
+              continuation.resume(false)
+      	}
+      	.create()
+      	.alse{
+              continuation.invokeOnCancellation{
+                  dialog.dismiss()
+              }
+      	}
+      	.show()
+  }
+  
+  lifecycleScope.launch{
+      val myChoice = alert("Warning","Do you want this?")
+      toast("myChoice = $myChoice")
+  }
+  ```
