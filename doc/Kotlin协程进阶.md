@@ -180,4 +180,113 @@
     }
     ```
 
-    
+##### Channel
+
+- 非阻塞的通信基础设施
+- 类似于 BlockingQueue + 挂起函数
+- Channel 的分类
+  - RENDEZVOUS
+    - 不见不散，send 调用后挂起直到 receive 到达
+  - UNLIMITED
+    - 无限容量，send 调用后直接返回
+  - CONFLATED
+    - 保留最新，receive 只能获得最近一次 send 的值
+  - BUFFERED
+    - 默认容量，可通过程序参数设置默认大小，默认为64
+  - FIXED
+    - 固定容量，通过参数执行缓存大小
+- Channel 的关闭
+  - 调用 close 关闭 Channel
+  - 关闭后调用 send 抛异常，isClosedForSend 返回 true
+  - 关闭后调用 receive 可接收缓存的数据
+  - 缓存消费完后 receive 抛异常，isClosedForReceive 返回 true
+- Channel 的迭代
+- Channel 的协程 Builder
+  - produce：启动一个生产者协程，返回 ReceiveChannel
+  - actor：启动一个消费者协程，返回 SendChannel
+  - 以上 Builder 启动的协程结束后自动关闭对应的 Channel
+
+###### Select
+
+- Select 是一个IO多路复用的概念
+- 协程的 Select 用于挂起函数的多路复用
+
+###### 案例：统计代码行数
+
+###### Flow
+
+- Sequence
+
+- 读取 Flow
+
+  ```
+  suspend fun main(){
+      val intFlow = flow{
+          ...
+      }
+      intFlow.collect{
+          log(it)
+      }
+  }
+  ```
+
+- 使用调度器
+
+  ```
+  GlobalScope.launch(dispatcher){
+      val intFlow = flow{
+          ...
+      }
+      intFlow.flowOn(Dispatchers.IO).collect{
+          log(it)
+      }
+  }
+  ```
+
+- 异常处理
+
+  ```
+  flow{
+      emit(1)
+      throw Exception("div 0")
+  }.catch{
+      log("caught error")
+  }.onCompletion{
+      t: Throwable? -> log("finally.")
+  }
+  ```
+
+- Flow 的取消
+
+  - Flow 的运行依赖于协程
+  - Flow 的取消取决于 collect 所在协程的取消
+  - collect 作为挂起函数可以响应所在协程的取消状态
+
+- 从集合创建 Flow
+
+  ```
+  listOf(1,2,3,4).asFlow()
+  setOf(1,2,3,4).asFlow()
+  flowOf(1,2,3,4)
+  ```
+
+- 从 Channel 创建 Flow
+
+- Flow 元素并发生成
+
+  ```
+  channelFlow{
+      send(1)
+      withContext(Dispatchers.IO){
+          send(2)
+      }
+  }
+  ```
+
+- Back Pressure
+
+  - buffer：指定固定容量的缓存
+  - conflate：保留最新的值
+  - collectLatest：新值发送时取消之前的
+
+###### 案例：协程在 Android 中的应用
