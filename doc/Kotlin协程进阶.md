@@ -1,0 +1,183 @@
+###### 协程的基本要素
+
+- 挂起函数：以 suspend 修饰的函数
+- 挂起函数只能在其他挂起函数或协程中调用
+- 挂起函数调用时包含了协程挂起的语义
+- 挂起函数返回时则包含了协程恢复的语义
+- Continuation
+- 挂起函数的类型，调用挂起函数需要传入 Continuation
+- 将回调转写成挂起函数
+  - 使用 suspendCoroutine 获取挂起函数的 Continuation
+  - 回调成功的分支使用 Continuation.resume(value)
+  - 回调失败则使用 Continuation.resumeWithException(e)
+- 协程的创建
+  - 需要一个函数：suspend function 
+  - 也需要一个 API：createConroutine, startCoroutine
+- 协程上下文
+  - 协程执行过程中需要携带数据
+- 拦截器
+  - 拦截器 ContinuationInterceptor 是一类协程上下文元素
+  - 可以对协程上下文所在协程的 Continuation 进行拦截
+
+###### 官方协程框架的概念
+
+- builders
+  - launch：启动一个普通的协程
+  - async：启动一个有结果返回的协程
+  - runBlocking
+- delay
+- 调度器
+  - 拦截器
+  - Default
+  - Android
+- 取消响应
+  - 协程支持取消，并将状态流转为取消状态
+  - 协程内部的挂起函数调用支持对所在协程的取消状态的响应才能真正取消
+- 异常处理
+  - CoroutineExceptionHandler
+  - launch 内出现未捕获的异常会抛给异常处理器
+  - async 内出现未捕获的异常只有在 await 调用时才会抛出
+  - 协程出现异常后都会根据所在作用域来尝试将异常向上传递
+- 作用域
+  - GlobalScope
+    - 顶级作用域
+    - 异常不向外部传播
+  - coroutineScope
+    - 协同作用域
+    - 主要是用来获取当前挂起函数所在的作用域
+    - 子协程异常后会取消父协程
+  - supervisorScope
+    - 主从作用域
+    - 主要是用来向父协程屏蔽子协程的异常的
+    - 子协程异常后不会取消父协程
+
+###### 官方协程框架的运用
+
+- kotlinx.coroutines
+
+  - 官方协程框架，基于标准库实现的特性封装
+  - <https://github.com/Kotlin/kotlinx.coroutines>
+
+- 协程框架的引入
+
+  ```
+  // 标准库
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+  // 协程基础库
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
+  // 协程Android库，提供Android UI调度器
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.5'
+  ```
+
+- Kotlin 协程的启动模式
+
+  - DEFAULT 立即开始调度协程体，调度前若取消则直接取消
+  - ATOMIC 立即开始调度，且在第一个挂起点前不能被取消
+  - LAZY 只有在需要 ( start / join / await ) 时开始调度
+  - UNDISPATCHED 立即在当前线程执行协程体，直到遇到第一个挂起点
+
+  ```
+  GlobalScope.launch(start = CoroutineStart.DEFAULT){
+      log(-1)
+      delay(1000L)
+  	log(-2)
+  }
+  ```
+
+- Kotlin 协程的调度器
+
+  - Default 线程池，适合 CPU 密集型
+  - Main UI 线程
+  - Unconfined 直接执行
+  - IO 线程池，比 Default 多了队列，适合 IO 密集型
+
+- 其他特性
+
+  - Channel：热数据流，并发安全的通信机制
+  - Flow：冷数据流，协程的响应式API
+  - Select：可对多个挂起事件进行等待
+
+- 回调转协程的完整写法
+
+  - 不支持取消的写法
+
+    ```
+    suspend fun <T> Call<T>.awaitNonCancellable(): T = suspendCoroutine{
+        ...
+    }
+    ```
+
+  - 支持取消的写法
+
+    ```
+    suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine{
+        continuation ->
+        continuation.invokeOnCancellation{
+            cancel()
+        }
+        ...
+    }
+    ```
+
+  - Retrofit 回调转协程，官方也有同样实现
+
+    ```
+    suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine{
+        continuation ->
+        continuation.invokeOnCancellation{
+            cancel()
+        }
+        enqueue(object:Callback<T>{
+            override fun onFailure(call: Call<T>,t: Throwable){
+                continuation.resumeWithException(t)
+            }
+            override fun onResponse(call: Call<T>,response: Response<T>){
+                response.takeIf{ it.isSuccessful }?.body()?.also{ continuation.resume(it) }?			continuation.resumeWithException(HttpException(response))
+            }
+        })
+    }
+    ```
+
+  - Handler
+
+    ```
+    suspend fun <T> Handler.run(block: ()-> T) = suspendCoroutine<T>{
+        continuation ->
+        post{
+            try{
+                continuation.resume(block())
+            }catch(e: Exception){
+                continuation.resumeWithException(e)
+            }
+        }
+    }
+    
+    suspend fun <T> Handler.runDelay(delay: Long, block: ()-> T) = suspendCancellableCoroutine<T>{
+        continuation ->
+        val message = Message.obtain(this){
+            try{
+                continuation.resume(block())
+            }catch(e: Exception){
+                continuation.resumeWithException(e)
+            }
+        }.also{
+            it.obj = continuation
+        }
+        continuation.invokeOnCancellation{
+        	removeCallbacksAndMessage(continuation)
+        }
+        sendMessageDelayed(message,delay)
+    }
+    
+    suspend fun main(){
+        Looper.prepareMainLooper()
+        GlobalScope.launch{
+            val handler = Handler(Looper.getMainLooper())
+            val result = handler.run{ "Hello" }
+            val delayedResult = handler.runDelay(1000){ "World" }
+    	    Looper.getMainLooper().quit()
+        }
+    }
+    ```
+
+    
