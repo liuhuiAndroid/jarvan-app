@@ -1,4 +1,4 @@
-package com.jarvan.app.core.ext
+﻿package com.jarvan.app.core.ext
 
 import android.graphics.Outline
 import android.view.View
