@@ -97,90 +97,90 @@
   - Flow：冷数据流，协程的响应式API
   - Select：可对多个挂起事件进行等待
 
-- 回调转协程的完整写法
+###### 回调转协程的完整写法
 
-  - 不支持取消的写法
+- 不支持取消的写法
 
-    ```
-    suspend fun <T> Call<T>.awaitNonCancellable(): T = suspendCoroutine{
-        ...
-    }
-    ```
+  ```
+  suspend fun <T> Call<T>.awaitNonCancellable(): T = suspendCoroutine{
+      ...
+  }
+  ```
 
-  - 支持取消的写法
+- 支持取消的写法
 
-    ```
-    suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine{
-        continuation ->
-        continuation.invokeOnCancellation{
-            cancel()
-        }
-        ...
-    }
-    ```
+  ```
+  suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine{
+      continuation ->
+      continuation.invokeOnCancellation{
+          cancel()
+      }
+      ...
+  }
+  ```
 
-  - Retrofit 回调转协程，官方也有同样实现
+- Retrofit 回调转协程，官方也有同样实现
 
-    ```
-    suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine{
-        continuation ->
-        continuation.invokeOnCancellation{
-            cancel()
-        }
-        enqueue(object:Callback<T>{
-            override fun onFailure(call: Call<T>,t: Throwable){
-                continuation.resumeWithException(t)
-            }
-            override fun onResponse(call: Call<T>,response: Response<T>){
-                response.takeIf{ it.isSuccessful }?.body()?.also{ continuation.resume(it) }?			continuation.resumeWithException(HttpException(response))
-            }
-        })
-    }
-    ```
+  ```
+  suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine{
+      continuation ->
+      continuation.invokeOnCancellation{
+          cancel()
+      }
+      enqueue(object:Callback<T>{
+          override fun onFailure(call: Call<T>,t: Throwable){
+              continuation.resumeWithException(t)
+          }
+          override fun onResponse(call: Call<T>,response: Response<T>){
+              response.takeIf{ it.isSuccessful }?.body()?.also{ continuation.resume(it) }?			continuation.resumeWithException(HttpException(response))
+          }
+      })
+  }
+  ```
 
-  - Handler
+- Handler
 
-    ```
-    suspend fun <T> Handler.run(block: ()-> T) = suspendCoroutine<T>{
-        continuation ->
-        post{
-            try{
-                continuation.resume(block())
-            }catch(e: Exception){
-                continuation.resumeWithException(e)
-            }
-        }
-    }
-    
-    suspend fun <T> Handler.runDelay(delay: Long, block: ()-> T) = suspendCancellableCoroutine<T>{
-        continuation ->
-        val message = Message.obtain(this){
-            try{
-                continuation.resume(block())
-            }catch(e: Exception){
-                continuation.resumeWithException(e)
-            }
-        }.also{
-            it.obj = continuation
-        }
-        continuation.invokeOnCancellation{
-        	removeCallbacksAndMessage(continuation)
-        }
-        sendMessageDelayed(message,delay)
-    }
-    
-    suspend fun main(){
-        Looper.prepareMainLooper()
-        GlobalScope.launch{
-            val handler = Handler(Looper.getMainLooper())
-            val result = handler.run{ "Hello" }
-            val delayedResult = handler.runDelay(1000){ "World" }
-    	    Looper.getMainLooper().quit()
-        }
-    }
-    ```
+  ```
+  suspend fun <T> Handler.run(block: ()-> T) = suspendCoroutine<T>{
+      continuation ->
+      post{
+          try{
+              continuation.resume(block())
+          }catch(e: Exception){
+              continuation.resumeWithException(e)
+          }
+      }
+  }
+  
+  suspend fun <T> Handler.runDelay(delay: Long, block: ()-> T) = suspendCancellableCoroutine<T>{
+      continuation ->
+      val message = Message.obtain(this){
+          try{
+              continuation.resume(block())
+          }catch(e: Exception){
+              continuation.resumeWithException(e)
+          }
+      }.also{
+          it.obj = continuation
+      }
+      continuation.invokeOnCancellation{
+      	removeCallbacksAndMessage(continuation)
+      }
+      sendMessageDelayed(message,delay)
+  }
+  
+  suspend fun main(){
+      Looper.prepareMainLooper()
+      GlobalScope.launch{
+          val handler = Handler(Looper.getMainLooper())
+          val result = handler.run{ "Hello" }
+          val delayedResult = handler.runDelay(1000){ "World" }
+  	    Looper.getMainLooper().quit()
+      }
+  }
+  ```
 
-##### Channel
+###### Channel
 
 - 非阻塞的通信基础设施
 - 类似于 BlockingQueue + 挂起函数
