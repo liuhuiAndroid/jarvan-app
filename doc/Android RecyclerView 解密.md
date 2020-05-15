@@ -86,6 +86,8 @@ LayoutManager.setInitialPrefetchItemCount()
 
 - 数据缓存，提高二次加载速度
 
+- ：Adapter 重写 getItemId 方法，并且设置 setHasStableIds(true)
+
 #### 参考
 
 - [RecyclerView一些你可能需要知道的优化技术](https://www.jianshu.com/p/1d2213f303fc)
