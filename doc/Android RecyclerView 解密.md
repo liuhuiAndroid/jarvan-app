@@ -74,21 +74,41 @@ LayoutManager.setInitialPrefetchItemCount()
    }
   ```
 
+- 使用 ConstraintLayout 替换复杂的布局
+
 - 使用 DiffUtil 进行差异化比较
 
 - Item 高度是固定，使用 RecyclerView.setHasFixedSize(true) 避免重复测量
 
 - 多个 RecycledView 的 Adapter 一样，可以共用 RecyclerViewPool 
 
-- 通过 RecycleView.setItemViewCacheSize(size) 加大缓存，用空间换时间来提高滚动的流畅性
+- 加大缓存，用空间换时间来提高滚动的流畅性
+
+  ```kotlin
+  recyclerView.setItemViewCacheSize(20)
+  // 开启
+  recyclerView.setDrawingCacheEnabled(true)
+  recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH)
+  ```
 
 - 共用监听器
 
 - 数据缓存，提高二次加载速度
 
-- ：Adapter 重写 getItemId 方法，并且设置 setHasStableIds(true)
+- onCreateViewHolder 中 setOnClickListener
+
+- 不到万不得已不要全局刷新，使用局部刷新
+
+  - 如果使用了全局刷新，Adapter 重写 getItemId 方法，并且设置 setHasStableIds(true)
+
+#### 其他
+
+- RecyclerView 滑动时图片加载的优化
+
+  在滑动时停止加载图片，在滑动停止时开始加载图片，这里用了Glide.pause 和 Glide.resume
 
 #### 参考
 
 - [RecyclerView一些你可能需要知道的优化技术](https://www.jianshu.com/p/1d2213f303fc)
 - [RecyclerView 性能优化](https://juejin.im/post/5baedbf05188255c596714ab)
+- [RecyclerView Scrolling Performance](https://stackoverflow.com/questions/27188536/recyclerview-scrolling-performance)
