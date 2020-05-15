@@ -1,0 +1,92 @@
+#### 预取 Prefetch
+
+ [RecyclerView 数据预取](https://juejin.im/entry/58a3f4f62f301e0069908d8f)
+
+```kotlin
+LayoutManager.setItemPrefetchEnabled()
+LayoutManager.setInitialPrefetchItemCount()
+```
+
+#### 缓存
+
+- Scrap 保存被移除掉但可能马上要使用的缓存，优先考虑
+
+  ```java
+  // 存储的是刚从屏幕上分离出来的，但是又即将添加到屏幕上去的 ViewHolder
+  final ArrayList<ViewHolder> mAttachedScrap = new ArrayList<>();
+  // 存储的是数据被更新的 ViewHolder
+  ArrayList<ViewHolder> mChangedScrap = null;
+  ```
+
+- Cache
+
+  缓存默认大小为2，可以通过 **setViewCacheSize** 改变容量大小
+
+  存储预取的 ViewHolder，同时在回收 ViewHolder 时，也会可能存储一部分的 ViewHolder
+
+  ```java
+  final ArrayList<ViewHolder> mCachedViews = new ArrayList<ViewHolder>();
+  ```
+
+- ViewCacheExtension 
+
+  自定义缓存，通常用不到
+
+  ```java
+  private ViewCacheExtension mViewCacheExtension;
+  ```
+
+- RecyclerViewPool 
+
+  根据 ViewType 缓存无效的 ViewHoler，数组大小为5
+
+  mCachedViews 存不下的会被保存到 mRecyclerPool 中，mRecyclerPool 保存满之后只能无情抛弃掉，它也有一个默认的容量大小
+
+  ```java
+  RecycledViewPool mRecyclerPool;
+  ```
+
+#### 优化
+
+- 关闭默认动画提升效率：
+
+  ```java
+   /**
+    * 打开默认局部刷新动画
+    */
+   public void openDefaultAnimator() {
+       this.getItemAnimator().setAddDuration(120);
+       this.getItemAnimator().setChangeDuration(250);
+       this.getItemAnimator().setMoveDuration(250);
+       this.getItemAnimator().setRemoveDuration(120);
+       ((SimpleItemAnimator) this.getItemAnimator()).setSupportsChangeAnimations(true);
+   }
+  
+   /**
+    * 关闭默认局部刷新动画
+    */
+   public void closeDefaultAnimator() {
+       this.getItemAnimator().setAddDuration(0);
+       this.getItemAnimator().setChangeDuration(0);
+       this.getItemAnimator().setMoveDuration(0);
+       this.getItemAnimator().setRemoveDuration(0);
+       ((SimpleItemAnimator) this.getItemAnimator()).setSupportsChangeAnimations(false);
+   }
+  ```
+
+- 使用 DiffUtil 进行差异化比较
+
+- Item 高度是固定，使用 RecyclerView.setHasFixedSize(true) 避免重复测量
+
+- 多个 RecycledView 的 Adapter 一样，可以共用 RecyclerViewPool 
+
+- 通过 RecycleView.setItemViewCacheSize(size) 加大缓存，用空间换时间来提高滚动的流畅性
+
+- 共用监听器
+
+- 数据缓存，提高二次加载速度
+
+#### 参考
+
+- [RecyclerView一些你可能需要知道的优化技术](https://www.jianshu.com/p/1d2213f303fc)
+- [RecyclerView 性能优化](https://juejin.im/post/5baedbf05188255c596714ab)
