@@ -90,20 +90,64 @@ hencoder {
   - 先添加依赖
 
     ```groovy
-        repositories {
-            google()
-            jcenter()
-        }
-        dependencies {
-            classpath 'com.android.tools.build:gradle:3.2.1'
-        }
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        implementation 'com.android.tools.build:gradle:3.2.1'
+    }
     ```
 
   - 然后继承 com.android.build.api.transform.Transform，创建一个子类
 
     ```groovy
-    class DemoTransform extends Transform{
+    public class TransformDemo extends Transform {
         
+        // 对应的 task 名称
+        @Override
+        String getName() {
+            return "hencoderTransform"
+        }
+    
+        // 你要对哪些类型的结果进行转换，是字节码还是资源文件
+        @Override
+        Set<QualifiedContent.ContentType> getInputTypes() {
+            return TransformManager.CONTENT_CLASS
+        }
+    
+        // 适用范围是什么？
+        @Override
+        Set<? super QualifiedContent.Scope> getScopes() {
+            return TransformManager.SCOPE_FULL_PROJECT
+        }
+    
+        @Override
+        boolean isIncremental() {
+            return false
+        }
+    
+        // 具体的转换过程
+        @Override
+        void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
+    
+            def inputs = transformInvocation.inputs
+            def outputProvider = transformInvocation.outputProvider
+    
+            inputs.each {
+                // jarInputs：各个依赖所编译成的 jar 文件
+                it.jarInputs.each {
+                    File dest = outputProvider.getContentLocation(it.name, it.contentTypes, it.scopes, Format.JAR)
+                    FileUtils.copyFile(it.file, dest)
+                }
+    
+                // directoryInputs：本地 project 编译成的多个 class 文件存放的目录
+                it.directoryInputs.each {
+                    File dest = outputProvider.getContentLocation(it.name, it.contentTypes, it.scopes, Format.DIRECTORY)
+                    FileUtils.copyDirectory(it.file, dest)
+                }
+            }
+        }
     }
     ```
 
