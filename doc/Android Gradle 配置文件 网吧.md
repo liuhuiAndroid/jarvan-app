@@ -25,26 +25,6 @@
     // main 同级建立 release 包，下面放 BuildTypeUtils.java，写 release 的代码
     ```
 
-  - android
-
-    - buildTypes
-
-    - productFlavors 渠道包
-
-    - flavorDimensions 渠道包
-
-      ```
-      flavorDimensions 'china', 'nation'
-      productFlavors {
-      	free{
-      		dimension 'china'
-      	}
-      	china{
-      		dimension 'nation'
-      	}
-      }
-      ```
-
 - setting.gradle
 
 - gradle-wrapper
@@ -57,13 +37,35 @@
 
 #### buildType 和 produceFlavors
 
- 
+Android 打渠道包
+
+```
+flavorDimensions 'china', 'nation'
+productFlavors {
+	free{
+		dimension 'china'
+	}
+	china{
+		dimension 'nation'
+	}
+}
+```
 
 #### compile，implementation 和 api
 
 - implementation：不会传递依赖
 - compile / api：会传递依赖；api 是 compile 的替代品，效果完全相同
 - 当依赖被传递时，二级依赖的改动会导致0级项目重新编译；当依赖不传递时，二级依赖的改动不会导致0级项目重新编译
+
+#### gradle-wrapper
+
+帮助不需要安装 gradle 也可以运行 gradle 项目
+
+```
+gradle wrapper
+
+gradlew assemble
+```
 
 #### 项目结构
 
@@ -73,9 +75,34 @@
 #### task
 
 - 使用方法
+
+  ```
+  gradlew taskName
+  ```
+
 - task 的结构
+
+  ```
+  task taskName{
+  	初始化代码
+  	doFirst{
+  		task 代码
+  	}
+  	doLast{
+  		task 代码
+  	}
+  }
+  ```
+
 - doFirst doLast 和普通代码段的区别
+
+  - 普通代码段：在 task 创建过程中就会被执行，发生在 configuration 阶段
+  - doFirst doLast：在 task 执行过程中被执行，发生在 execution 阶段。如果用户没有直接或间接执行 task，那么它的 doFirst doLast 代码不会被执行
+  - doFirst doLast 都是 task 代码，其中 doFirst 是往队列的前面插入代码，doLast 是往队列的后面插入代码
+
 - task 的依赖
+
+  可以使用 task taskA 的形式来指定依赖。指定依赖后，task 会在自己执行前先执行自己依赖的 task 
 
 #### gradle 执行的什么周期
 
