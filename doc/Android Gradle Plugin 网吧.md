@@ -67,6 +67,8 @@ hencoder {
 
 ###### 正式的项目：自定义 Plugin 写在 buildSrc 目录下
 
+- 配置是死套路，具体如下
+
 - main/resources/META-INF/gradle-plugins/*.properties 中的 * 是插件的名称，例如 *.properties 是 com.hencoder.plugindemo.properties，最终在应用插件的代码就应该是：
 
   ```groovy
@@ -79,7 +81,7 @@ hencoder {
   implementation-class=com.hencoder.plugin_demo.DemoPlugin
   ```
 
-  其中等号右边指定了 Plugin 具体是哪个类
+  其中等号右边指定了 Plugin 具体是哪个类，具体的 groovy 文件和 build.gradle 内写法一致
 
 - Plugin 和 Extension 写法和在 build.gradle 里的写法一样
 
