@@ -70,7 +70,7 @@ gradle wrapper
 gradlew assemble
 ```
 
-#### 项目结构
+#### gradle 的项目结构
 
 - 单 project
 
@@ -108,11 +108,13 @@ gradlew assemble
 
   - 普通代码段：在 task 创建过程中就会被执行，发生在 configuration 阶段
   - doFirst doLast：在 task 执行过程中被执行，发生在 execution 阶段。如果用户没有直接或间接执行 task，那么它的 doFirst doLast 代码不会被执行
-  - doFirst doLast 都是 task 代码，其中 doFirst 是往队列的前面插入代码，doLast 是往队列的后面插入代码
+  - doFirst doLast 都是 task 代码，其中 doFirst 是往任务队列的前面插入代码，doLast 是往任务队列的后面插入代码
 
 - task 的依赖
 
-  可以使用 task taskA(dependsOn: b) 的形式来指定依赖。指定依赖后，task 会在自己执行前先执行自己依赖的 task 
+  可以使用 task taskA(dependsOn: taskB) 的形式来指定依赖。指定依赖后，taskA 会在自己执行前先执行自己依赖的 taskB
+  
+- task 实际例子：增加配置的版本名和版本号
 
 #### gradle 执行的什么周期
 
@@ -127,13 +129,9 @@ gradlew assemble
     
   - 二三阶段之间
 
-    ```
+    ```groovy
     afterEvaluate{
     	插入代码
     }
     ```
-
-    
-
-
 
