@@ -1,28 +1,30 @@
-#### gradle 是什么
+## Gradle 配置文件拆解
 
-- gradle 是构建工具，不是语言
-- gradle 用了 Groovy 语言，创造了一种 DSL，但它本身不是语言
+#### gradle 是什么?
 
-#### 怎么构建
+gradle 利用 Groovy 语言，创造了一种 DSL，但它本身不是语言，它是构建工具
+
+#### 怎么构建?
 
 按照 gradle 的规则构建
 
 - build.gradle
 
-  - buildscript：配置 plugin
-    - repositories：配置依赖的仓库地址
+  - buildscript：配置 plugin，里面是稍后执行的代码
+    - repositories：配置 plugin 依赖的仓库地址
     - dependencies：配置 plugin 依赖
-      - classpath：相当于 add('classpath','xxx')
+      - classpath：相当于 add('classpath','xxx')，指定要使用的 plugin
   - allprojects：配置 module
-    - repositories：配置依赖的仓库地址
+    - repositories：配置 module 依赖的仓库地址
 
 - app.gradle
 
-  - 区分 debug 和 release
+  - 区分 debug 和 release 版本，debug 不写也是默认有的
 
     ```java
     // main 同级建立 debug 包，下面放 BuildTypeUtils.java，写 debug 的代码
     // main 同级建立 release 包，下面放 BuildTypeUtils.java，写 release 的代码
+    MainActivity 添加 BuildTypeUtils#drawBadge 方法，分别在 debug 包和 release 包下有不同的实现
     ```
 
 - setting.gradle
@@ -33,14 +35,16 @@
 
 #### 闭包
 
-- 相当于可以传递的代码块
+- 相当于可以被传递的代码块
 
 #### buildType 和 produceFlavors
 
 Android 打渠道包
 
-```
+```groovy
+// 风味维度
 flavorDimensions 'china', 'nation'
+// 产品风味
 productFlavors {
 	free{
 		dimension 'china'
@@ -59,18 +63,24 @@ productFlavors {
 
 #### gradle-wrapper
 
-帮助不需要安装 gradle 也可以运行 gradle 项目
+帮助安装 gradle，运行 gradle 项目
 
 ```
 gradle wrapper
-
 gradlew assemble
 ```
 
 #### 项目结构
 
 - 单 project
-- 多 project
+
+- 多 project：由 setting.gradle 配置多个
+
+  查找 settings 的顺序：
+
+  - 当前目录
+  - 兄弟目录
+  - 父目录
 
 #### task
 
@@ -102,18 +112,28 @@ gradlew assemble
 
 - task 的依赖
 
-  可以使用 task taskA 的形式来指定依赖。指定依赖后，task 会在自己执行前先执行自己依赖的 task 
+  可以使用 task taskA(dependsOn: b) 的形式来指定依赖。指定依赖后，task 会在自己执行前先执行自己依赖的 task 
 
 #### gradle 执行的什么周期
 
 - 三个阶段
-  - 初始化阶段
-  - 定义阶段
-  - 执行阶段
+  - 初始化阶段：执行 setting.gradle，确定主 project 和子 project
+  - 定义阶段：执行每个 project 的 build.gradle，确定出所有 task 所组成的有向无环图
+  - 执行阶段：按照上一阶段所确定出的有向无环图来执行指定的 task
 - 在阶段之间插入代码
   - 一二阶段之间
+    
     - setting.gradle 的最后
+    
   - 二三阶段之间
+
+    ```
+    afterEvaluate{
+    	插入代码
+    }
+    ```
+
+    
 
 
 
