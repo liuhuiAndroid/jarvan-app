@@ -3,7 +3,7 @@
 - getter / setter
   - 每个 field，Groovy 会自动创建它的 getter 和 setter 方法，从外部可以直接调用，并且在使用 object.fieldA 来获取值或者使用 object.fieldA = newValue 来赋值的时候，实际会自动转调用 object.getFieldA() 和 object.setFieldA(newValue)
 - 字符串中单双引号
-  - 单引号是不不带转义的，而双引号内的内容可以使用 "string1${var}string2"的方式来转义
+  - 单引号是不带转义的，而双引号内的内容可以使用 "string1${var}string2"的方式来转义
 
 #### Gradle Plugin
 
@@ -83,13 +83,14 @@ hencoder {
 
 #### Transform
 
-- 是什么？：是由 Android 提供的，在项目构建过程中把编译后的文件添加自定义中间处理过程的工具
+- 是什么？：是由 Android 提供的，在项目构建过程中把编译后的文件（jar 文件和 class 文件）添加自定义的中间处理过程的工具
 
 - 怎么写？
 
   - 先添加依赖
 
     ```groovy
+    // 因为 buildSrc 早于任何一个 project 执行，因此需要自己添加仓库
     repositories {
         google()
         jcenter()
@@ -97,10 +98,10 @@ hencoder {
     dependencies {
         implementation 'com.android.tools.build:gradle:3.2.1'
     }
-    ```
-
-  - 然后继承 com.android.build.api.transform.Transform，创建一个子类
-
+  ```
+  
+- 然后继承 com.android.build.api.transform.Transform，创建一个子类
+  
     ```groovy
     public class TransformDemo extends Transform {
         
@@ -116,7 +117,7 @@ hencoder {
             return TransformManager.CONTENT_CLASS
         }
     
-        // 适用范围是什么？
+        // 适用范围是什么？整个 Project 还是别的？
         @Override
         Set<? super QualifiedContent.Scope> getScopes() {
             return TransformManager.SCOPE_FULL_PROJECT
@@ -149,6 +150,9 @@ hencoder {
             }
         }
     }
-    ```
-
+  ```
+  
   - 还能做什么：修改字节码：上面的这段代码只是把编译完的内容原封不动搬运到目标位置，没有实际用处。要修改字节码，需要引入其他工具，例如：javassist
+  
+  - javassist
+
