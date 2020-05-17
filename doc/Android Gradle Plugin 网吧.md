@@ -24,11 +24,17 @@ apply plugin: 'com.android.application'
 class PluginDemo implements Plugin<Project>{
 	@override
 	void apply(Project project){
-		println 'Hello author.'
+        def author = 'rengwuxian'
+        println "Hello ${author}"
 	}
 }
 
 apply plugin: PluginDemo
+```
+
+```
+// 运行可以发现 plugin 没有报错，且日志正常输出
+gradlew 
 ```
 
 ###### Extension
@@ -45,6 +51,7 @@ class PluginDemo implements Plugin<Project>{
         println "Hello ${extension.author}."
         
 		def extension = project.extensions.create('hencoder',ExtensionDemo)
+        // 由于是顺序执行但是配置在后面，需要稍后执行
         project.afterEvaluate{
             println "Hello ${extension.author}."
         }
@@ -52,12 +59,13 @@ class PluginDemo implements Plugin<Project>{
 }
 apply plugin: PluginDemo
 
+// 动态配置
 hencoder {
     author 'renwuxian'
 }
 ```
 
-###### 正式的项目：写在 buildSrc 目录下
+###### 正式的项目：自定义 Plugin 写在 buildSrc 目录下
 
 - main/resources/META-INF/gradle-plugins/*.properties 中的 * 是插件的名称，例如 *.properties 是 com.hencoder.plugindemo.properties，最终在应用插件的代码就应该是：
 
