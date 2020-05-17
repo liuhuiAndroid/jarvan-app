@@ -10,6 +10,7 @@
 ##### 什么是 Gradle Plugin
 
 ```groovy
+// 官方插件
 apply plugin: 'com.android.application'
 ```
 
@@ -87,7 +88,7 @@ hencoder {
 
 - 怎么写？
 
-  - 先添加依赖
+  - 先新建 build.gradle 添加依赖
 
     ```groovy
     // 因为 buildSrc 早于任何一个 project 执行，因此需要自己添加仓库
@@ -96,11 +97,12 @@ hencoder {
         jcenter()
     }
     dependencies {
+        // 项目代码使用
         implementation 'com.android.tools.build:gradle:3.2.1'
-    }
-  ```
-  
-- 然后继承 com.android.build.api.transform.Transform，创建一个子类
+  }
+    ```
+
+  - 然后继承 com.android.build.api.transform.Transform，创建一个子类
   
     ```groovy
     public class TransformDemo extends Transform {
@@ -111,37 +113,22 @@ hencoder {
             return "hencoderTransform"
         }
     
-        // 你要对哪些类型的结果进行转换，是字节码还是资源文件
-        @Override
-        Set<QualifiedContent.ContentType> getInputTypes() {
-            return TransformManager.CONTENT_CLASS
-        }
-    
-        // 适用范围是什么？整个 Project 还是别的？
-        @Override
-        Set<? super QualifiedContent.Scope> getScopes() {
-            return TransformManager.SCOPE_FULL_PROJECT
-        }
-    
         @Override
         boolean isIncremental() {
             return false
         }
     
-        // 具体的转换过程
+        // 具体的转换过程，作用：比如注入方法计时方法
         @Override
         void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-    
             def inputs = transformInvocation.inputs
             def outputProvider = transformInvocation.outputProvider
-    
             inputs.each {
                 // jarInputs：各个依赖所编译成的 jar 文件
                 it.jarInputs.each {
                     File dest = outputProvider.getContentLocation(it.name, it.contentTypes, it.scopes, Format.JAR)
                     FileUtils.copyFile(it.file, dest)
                 }
-    
                 // directoryInputs：本地 project 编译成的多个 class 文件存放的目录
                 it.directoryInputs.each {
                     File dest = outputProvider.getContentLocation(it.name, it.contentTypes, it.scopes, Format.DIRECTORY)
@@ -150,8 +137,8 @@ hencoder {
             }
         }
     }
-  ```
-  
+    ```
+    
   - 还能做什么：修改字节码：上面的这段代码只是把编译完的内容原封不动搬运到目标位置，没有实际用处。要修改字节码，需要引入其他工具，例如：javassist
   
   - javassist
