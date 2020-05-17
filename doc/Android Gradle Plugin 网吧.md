@@ -92,6 +92,12 @@ hencoder {
   - buildSrc 所配置出来的 Plugin 会被自动添加到编译过程中每一个 project 的 classpath，因此它们才可以直接使用 apply plugin: 'xxx' 的方式来便捷应用这些 plugin
   - setting.gradle 中如果配置了 ':buildSrc'，buildSrc 目录就会被当做是子 Project，因此会被执行两遍。所以在 setting.gradle 里面应该删掉 ':buildSrc' 的配置
 
+- Tips
+
+  ```
+  可以使用 println "xxx" 和 gradlew 配合测试
+  ```
+
 #### Transform
 
 - 是什么？：是由 Android 提供的，在项目构建过程中把编译后的文件（jar 文件和 class 文件）添加自定义的中间处理过程的工具
