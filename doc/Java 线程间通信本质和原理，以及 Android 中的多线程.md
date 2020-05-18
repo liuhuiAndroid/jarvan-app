@@ -1,22 +1,59 @@
-# 线程间通信的本质和原理
+# 线程间通信的本质和原理，以及Android中的多线程
 
 #### 线程间交互
 
-- 一个线程启动别的线程：new Thread().start()、Executor.execute() 等
+- 一个线程启动另一个线程
+
+  - new Thread().start()
+  - Executor.execute() 
+  - ...
+
 - 一个线程终结另一个线程
-  - Thread.stop()
-  - Thread.interrupt()：温和式终结：不立即、不强制
-    - interrupted() 和 isInterrupted()：检查和重置中断状态
-    - interruptedException：如果在线程等待时中断，或者在中断状态等待，直接结束等待过程（因为等待过程什么也不会做，而 interrupt() 的目的是让线程做完收尾工作后尽快终结，所以要跳过等待过程）
+  - Thread.stop()：类似断电，不建议使用
+  
+  - Thread.interrupt()：温和式终结：不立即、不强制，建议使用
+    - Thread.interrupted() 和 isInterrupted()：检查和重置中断状态
+    
+      ```java
+      // 配合 Thread.interrupt() 中断线程，一般使用 Thread.interrupted()
+      // 一般在耗时操作前判断
+      if(Thread.interrupted()) {
+      	return;
+      }
+      ```
+    
+    - InterruptedException：如果在线程等待时中断，或者在中断状态等待，直接结束等待过程（因为等待过程什么也不会做，而 interrupt() 的目的是让线程做完收尾工作后尽快终结，所以要跳过等待过程）
+    
   - Object.wait() 和 Object.notify() / notifyAll()
-    - 在未达到目标时 wait()
+    - 在未达到目标时 wait()，释放 monitor
     - 用 while 循环检查
     - 设置完成后 notifyAll()
     - wait() 和 notify() / notifyAll() 都需要放在同步代码块里
-  - Thread.join()：让另一个线程插在自己前面
-  - Thread.yield()：暂时让出自己的时间片给同优先级的线程
+    
+    ```java
+    private synchronized void initString() {
+        sharedString = "rengwuxian";
+        notifyAll();
+    }
+    
+    private synchronized void printString() {
+        while (sharedString == null) {
+            try {
+                // 释放 monitor
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("String: " + sharedString);
+    }
+    ```
+    
+  - Thread.join()：让另一个线程插在自己前面，等对方结束了再执行自己，了解即可，使用场景较少
+  
+  - Thread.yield()：暂时让出自己的时间片给同优先级的线程，了解即可
 
-#### Android 的 Handler 机制
+#### Android 的 Handler 机制 - 暂停
 
 - 本质：在某个指定的运行中的线程上执行代码
 
