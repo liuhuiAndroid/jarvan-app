@@ -1,11 +1,30 @@
-﻿# Kodein源码分析 Jarvan-App
-### Android基础
+### 编程基础
+
+- HTTP 基础
+- 编码和加密
+- 登录和授权
+- TCP / IP 协议族
+- HTTPS
+
+### Java 基础
+
+- 深入理解 JVM
+
+### Android 基础
 
 - RecyclerView
   - [RecyclerView 源码分析(一) - RecyclerView的三大流程](https://www.jianshu.com/p/61fe3f3bb7ec)
   - [RecyclerView 源码分析(三) - RecyclerView的缓存机制](https://www.jianshu.com/p/efe81969f69d)
+- Gradle 配置文件拆解
+- Gradle Plugin 和构建流程解析：具体见 doc
+- 组件化、插件化和热更新
+- 手写热更新
+- Android 架构分析
+- Annotation Processing
+- ConstraintLayout 从上手到精通
+- 过渡动画及 MotionLayout
 
-### Kotlin基础
+### Kotlin 基础
 
 - [Kotlin的泛型](https://kaixue.io/kotlin-generics/)
 
@@ -25,7 +44,14 @@
 
 ### Jetpack
 ### 设计模式
-### 多线程和Java IO
+### 多线程和 Java IO（截止日期：2020-05-24）
+
+- [x] Java 多线程：多线程和线程同步：见 doc
+- [x] Java 多线程：线程间通信：见 doc
+- [x] Android 的多线程机制：见 doc
+- [x] RxJava 3 的原理全解析：见 doc
+- [x] Java I/O、NIO 和 Okio：见 doc
+
 ### 框架源码：
 
 - [x] ARouter源码分析
@@ -35,20 +61,15 @@
   - [一步一步的解析ARouter 源码](https://zhuanlan.zhihu.com/p/101277660)
   - [ARouter拦截器使用及源码解析](https://www.jianshu.com/p/c8d7b1379c1b)
   - apt javapoet
-- [ ] Okhttp源码分析
-- [ ] Retrofit源码分析 
-- [ ] Kodein源码分析 
-- [ ] HashMap源码解析 
-- [x] LeakCanary原理解析
+- [ ] Okhttp 源码分析
+- [ ] Retrofit 源码分析 
+- [ ] Kodein 源码分析 
+- [ ] HashMap 源码解析 
+- [x] LeakCanary 原理解析
   - [Leakcanary原理浅析](https://www.cnblogs.com/jymblog/p/11656221.html)
-- [ ] 理解JVM虚拟机 
-- [ ] BlockCanary原理解析 
-- [x] Gradle Plugin构建流程解析：具体见 doc 下的 Android Gradle Plugin
-- [x] Okio：具体见 doc 下的 Java IO 和 Okio
-- [x] RxJava 3
+- [ ] BlockCanary 原理解析 
 - [ ] mmkv
 - [ ] moshi
-- [ ] 理解JVM虚拟机 
 
 ### Git：
 
