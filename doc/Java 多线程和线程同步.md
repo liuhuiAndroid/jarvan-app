@@ -1,6 +1,6 @@
 #### 进程和线程
 
-- 进程和线程
+- 进程和线程的区别？
 
   - 操作系统中运行多个软件
   - 一个运行中的软件可能包含多个进程
@@ -11,7 +11,7 @@
   - CPU 线程
 
     - 多核 CPU 的每个核各自独立运行，因此每个核一个线程
-    - 四核八线程：CPU硬件方在硬件级别对 CPU 进行了一核多线程的支持，本质上依然是每个核一个线程
+    - 四核八线程：CPU硬件方在硬件级别对 CPU 进行了一核多线程的支持（超线程技术），本质上依然是每个核一个线程
 
   - 操作系统线程
 
@@ -19,9 +19,10 @@
 
   - 单核 CPU 也可以运行多线程操作系统
 
-- 线程是什么：按代码顺序执行下来，执行完毕就结束的一条线
+- 线程是什么：按代码顺序执行下来，执行完毕就结束的一条线。线程是操作系统能够进行运算调度的最小单位
 
   - UI 线程为什么不会结束？因为它在初始化完毕后会执行死循环，循环的内容是刷新界面
+  - Android 每隔 16.6ms 会刷新一次屏幕
 
 #### 多线程的使用
 
@@ -77,6 +78,8 @@
 
   - 常用：newCachedThreadPool()
 
+    创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程
+
     ```java
     Runnable runnable = new Runnable() {
         @Override
@@ -93,6 +96,8 @@
 
   - 短时批量处理：newFixedThreadPool()
 
+    创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待
+
     ```java
     ExecutorService executor = Executors.newFixedThreadPool(20);
     for(Bitmap bitmap: bitmaps){
@@ -102,6 +107,10 @@
     ```
 
 - Callable 和 Future
+
+  Callable 接口类似于 Runnable，但是 Runnable 不会返回结果，并且无法抛出返回结果的异常，而 Callable功能更强大一些，被线程执行后，可以返回值，这个返回值可以被 Future 拿到，也就是说，Future 可以拿到异步执行任务的返回值。
+
+  Future 就是对于具体的 Runnable 或者 Callable 任务的执行结果进行取消、查询是否完成、获取结果。必要时可以通过 get 方法获取执行结果，该方法会阻塞直到任务返回结果。
 
   ```java
   Callable<String> callable = new Callable<String>() {
@@ -166,38 +175,39 @@
   - synchronized 的本质
 
     - 保证方法内部或代码块内部资源（数据）的互斥访问，即同一时间，由同一个 Monitor 监视的代码，最多只能有一个线程在访问
-    - 保证线程之间对监视资源的数据同步。即，任何线程在获取到 Monitor 后的第一时间，会先将共享内存中的数据复制到自己的缓存中；任何线程在释放 Monitor 的第一时间，会先将缓存中的数据复制到共享内存中
+    - 保证线程之间对监视资源的数据同步。即任何线程在获取到 Monitor 后的第一时间，会先将共享内存中的数据复制到自己的缓存中；任何线程在释放 Monitor 的第一时间，会先将缓存中的数据复制到共享内存中
 
   - volatile
 
-    - 保证加了 volatile 关键字的字段的操作具有原子性和同步性。其中原子性相当于实现了针对单一字段的线程互斥访问。因为 volatile 可以看做事简化版的 synchronized 
+    - 保证加了 volatile 关键字的字段的操作具有原子性和同步性。其中原子性相当于实现了针对单一字段的线程间互斥访问。因为 volatile 可以看做事简化版的 synchronized 
     - volatile 只对基本类型（byte、char、short、int、long、float、double、boolean）的赋值操作和对象的引用赋值操作有效。
 
   - java.util.concurrent.atomic 包
 
-    - 下面有 AtomicInteger AtomicBoolean 等类，作用和 volatile 基本一致，可以看做是通用版的 volatile
+    - 下面有 AtomicInteger、AtomicBoolean 等类，作用和 volatile 基本一致，可以看做是通用版的 volatile
 
       ```java
       AtomicInteger count = new AtomicInteger(0);
       count.getAndIncrement();
       ```
 
-  - Lock / ReentrantReadWriteLock
+  - Lock / ReentrantReadWriteLock 读写锁
 
     - 同样是加锁机制，但使用方式更灵活，同时也更麻烦一些
 
       ```java
       Lock lock = new ReentrantLock();
       ...
-  lock.lock();
+    lock.lock();
       try{
-      x++;
+      	x++;
       } finally {
+          // 保证在方法提前结束或出现 Exception 的时候，依然能正常释放锁
           lock.unlock();
       }
       ```
     
-    - 一般并不会只是使用 Lock，而是会使用更复杂的锁，例如 ReadWriteLock
+    - 一般并不会只是使用 Lock，而是会使用更复杂的锁，例如 ReadWriteLock：
     
       ```java
       ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -209,9 +219,9 @@
       private void count() {
           writeLock.lock();
           try {
-          x++;
+          	x++;
           } finally {
-          writeLock.unlock();
+          	writeLock.unlock();
           }
       }
       
@@ -222,19 +232,19 @@
               	System.out.print(x + " ");
      		}
           	System.out.println();
-      } finally {
+          } finally {
           	readLock.unlock();
+          }
       }
-      }
-  ```
-    
+      ```
+  
 - 线程安全问题的本质
-    
-      在多个线程访问共同的资源时，在某一线程对资源进行写操作的中途，其他线程对这个写了一半的资源进行了读操作，或者基于这个写了一半的资源进行了写操作，导致出现数据错误
-    
-    - 锁机制的本质
-    
-      通过对共享资源进行访问限制，让同一时间只有一个线程可以访问资源，保证了数据的准确性
-    
-    - 不论是线程安全问题，还是针对线程安全问题所衍生出的锁机制，它们的核心都在于共享的资源，而不是某个方法或者某几行代码
+
+  在多个线程访问共同的资源时，在某一线程对资源进行写操作的中途，其他线程对这个写了一半的资源进行了读操作，或者基于这个写了一半的资源进行了写操作，导致出现数据错误
+
+- 锁机制的本质
+
+  通过对共享资源进行访问限制，让同一时间只有一个线程可以访问资源，保证了数据的准确性
+
+- 不论是线程安全问题，还是针对线程安全问题所衍生出的锁机制，它们的核心都在于共享的资源，而不是某个方法或者某几行代码
 

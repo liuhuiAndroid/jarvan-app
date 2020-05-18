@@ -64,7 +64,7 @@
 - [ ] Okhttp 源码分析
 - [ ] Retrofit 源码分析 
 - [ ] Kodein 源码分析 
-- [ ] HashMap 源码解析 
+- [x] HashMap 源码解析 
 - [x] LeakCanary 原理解析
   - [Leakcanary原理浅析](https://www.cnblogs.com/jymblog/p/11656221.html)
 - [ ] BlockCanary 原理解析 
