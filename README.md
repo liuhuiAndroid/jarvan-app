@@ -44,11 +44,7 @@
 - 理解JVM虚拟机 
 - BlockCanary原理解析 
 - Gradle Plugin构建流程解析
-- Okio
-  - Okio：A modern I/O library for Android, Kotlin, and Java.
-  - 官网：https://github.com/square/okio
-  - Okio基础使用部分：https://www.jianshu.com/p/3e0935bf2d45
-  - Okio源码分析部分：https://www.jianshu.com/p/dccb6e1bd536
+- Okio：具体见 doc 下的 Java IO 和 Okio
 - mmkv
 - moshi
 - RxJava 3
