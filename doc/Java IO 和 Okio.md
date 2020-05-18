@@ -1,6 +1,98 @@
 #### Java IO
 
+- I/O 是什么？
+
+  - 程序内部和外部进行数据交互的过程，就叫输入输出
+    - 程序内部是谁？内存
+    - 程序外部是谁？
+      - 一般来说有两类：本地文件和网络
+      - 也有别的情况，比如你和别的程序做交互，和你交互的程序也属于外部，但一般来说，就是文件和网络这么两种
+    - 从文件里或者从网络上读数据到内存里，就叫输入
+    - 从内存里写道文件里或者发送到网络上，就叫输出
+  - Java I.O的作用只有一个：和外界做数据交互
+
+- I/O 用法
+
+  - 使用流：例如 FileInputStream / FileOutputStream
+
+  - 可以用 Reader 和 Writer 来对字符进行读写
+
+  - 流的外面还可以套别的流，层层嵌套都可以
+
+  - BufferedXXX 可以给流加上缓冲。对于输入流，是每次多读一些放在内存里面，下次再取数据就不用再和外部做交互（即不必做 I/O 操作）；对于输出流，是把数据先在内存里面攒一下，攒够一波了再往外部去写。通过缓存的方式减少和外部的交互，从而可以提高效率。
+
+  - 文件的关闭：close()
+
+  - 需要用到的写过的数据，flush() 一下可以保证数据真正写到外部去（读数据没有这样的担忧）
+
+  - Java I/O 的原理就是内存和外界的交互，涉及的类非常多，用的时候再关注
+
+  - 使用 Socket 和 ServerSocket 进行网络交互
+
+    ```java
+    try {
+        ServerSocket serverSocket = new ServerSocket(8080);
+        Socket socket = serverSocket.accept();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        String data;
+        while (true) {
+            data = reader.readLine();
+            writer.write("data: " + data);
+            writer.write("\n");
+            writer.flush();
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    ```
+
 #### NIO
+
+- NIO 和 IO 的区别
+
+  - 传统 IO 用的是插管道的方式，用的是 Stream
+
+    NIO 用的也是插管道的方式，用的也是 Channel
+
+  - NIO 也用到 Buffer
+
+    - 它的 Buffer 可以被操作
+    - 它强制使用 Buffer
+    - 它的 Buffer 不好用
+
+  - NIO 有非阻塞式的支持
+
+    - 只是支持非阻塞式，而不是全是非阻塞式。默认是阻塞式的
+    - 而且就算是非阻塞式，也只是网络交互支持，文件交互式不支持的
+
+- 使用
+
+  - NIO 的 Buffer 模型
+
+  - 用 NIO 来读文件的写法
+
+    ```java
+    try {
+        RandomAccessFile file = new RandomAccessFile("./19_io/text.txt", "r");
+        // 使用 file.getChannel() 获取到 Channel
+        FileChannel channel = file.getChannel();
+        // 然后创建一个 Buffer
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        // 把文件内容读入 channel
+        channel.read(byteBuffer);
+        // 读完以后，用 flip() 翻页
+        byteBuffer.flip();
+        // 开始使用 Buffer
+        System.out.println(Charset.defaultCharset().decode(byteBuffer));
+        // 使用结束之后记得 clear
+        byteBuffer.clear();
+    } catch (FileNotFoundException e) {
+    	e.printStackTrace();
+    } catch (IOException e) {
+    	e.printStackTrace();
+    }
+    ```
 
 #### Okio
 
