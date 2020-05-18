@@ -1,4 +1,4 @@
-## Gradle 配置文件拆解
+# Gradle 配置文件拆解
 
 #### gradle 是什么?
 
@@ -79,7 +79,7 @@ gradlew assemble
   查找 settings 的顺序：
 
   - 当前目录
-  - 兄弟目录
+  - 兄弟目录 master
   - 父目录
 
 #### task
@@ -107,7 +107,7 @@ gradlew assemble
 - doFirst doLast 和普通代码段的区别
 
   - 普通代码段：在 task 创建过程中就会被执行，发生在 configuration 阶段
-  - doFirst doLast：在 task 执行过程中被执行，发生在 execution 阶段。如果用户没有直接或间接执行 task，那么它的 doFirst doLast 代码不会被执行
+  - doFirst 和 doLast：在 task 执行过程中被执行，发生在 execution 阶段。如果用户没有直接或间接执行 task，那么它的 doFirst doLast 代码不会被执行
   - doFirst doLast 都是 task 代码，其中 doFirst 是往任务队列的前面插入代码，doLast 是往任务队列的后面插入代码
 
 - task 的依赖
@@ -116,7 +116,7 @@ gradlew assemble
   
 - task 实际例子：增加配置的版本名和版本号
 
-#### gradle 执行的什么周期
+#### gradle 执行的生命周期
 
 - 三个阶段
   - 初始化阶段：执行 setting.gradle，确定主 project 和子 project

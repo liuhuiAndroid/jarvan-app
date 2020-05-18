@@ -1,13 +1,15 @@
+# Gradle Plugin
+
 #### Groovy 两个语法点
 
 - getter / setter
-  - 每个 field，Groovy 会自动创建它的 getter 和 setter 方法，从外部可以直接调用，并且在使用 object.fieldA 来获取值或者使用 object.fieldA = newValue 来赋值的时候，实际会自动转调用 object.getFieldA() 和 object.setFieldA(newValue)
+  - 每个 field，Groovy 会自动创建它的 getter 和 setter 方法，从外部可以直接调用，并且在使用 object.fieldA 来获取值或者使用 object.fieldA = newValue 来赋值的时候，实际上会自动转而调用 object.getFieldA() 和 object.setFieldA(newValue)
 - 字符串中单双引号
   - 单引号是不带转义的，而双引号内的内容可以使用 "string1${var}string2"的方式来转义
 
 #### Gradle Plugin
 
-##### 什么是 Gradle Plugin
+##### 什么是 Gradle Plugin？
 
 ```groovy
 // 官方插件
@@ -65,11 +67,11 @@ hencoder {
 }
 ```
 
-###### 正式的项目：自定义 Plugin 写在 buildSrc 目录下
+###### 正式的 Plugin 项目：自定义 Plugin 代码写在 buildSrc 目录下
 
 - 配置是死套路，具体如下
 
-- main/resources/META-INF/gradle-plugins/*.properties 中的 * 是插件的名称，例如 *.properties 是 com.hencoder.plugindemo.properties，最终在应用插件的代码就应该是：
+- main/resources/META-INF/gradle-plugins/*.properties 中的 * 是插件的名称，例如 *.properties 是 com.hencoder.plugindemo.properties，最终应用插件的代码就应该是：
 
   ```groovy
   apply plugin: 'com.hencoder.plugindemo'
@@ -77,7 +79,7 @@ hencoder {
 
 - *.properties 中只有一行，格式是：
 
-  ```
+  ```properties
   implementation-class=com.hencoder.plugin_demo.DemoPlugin
   ```
 
@@ -94,13 +96,13 @@ hencoder {
 
 - Tips
 
-  ```
   可以使用 println "xxx" 和 gradlew 配合测试
-  ```
 
 #### Transform
 
-- 是什么？：是由 Android 提供的，在项目构建过程中把编译后的文件（jar 文件和 class 文件）添加自定义的中间处理过程的工具
+- 是什么？：
+
+  是由 Android 提供的，在项目构建过程中把编译后的文件（jar 文件和 class 文件）添加自定义的中间处理过程的工具
 
 - 怎么写？
 
