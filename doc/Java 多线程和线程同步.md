@@ -198,7 +198,7 @@
       ```
       Lock lock = new ReentrantLock();
       // ...
-    lock.lock();
+      lock.lock();
       try{
       	x++;
       } finally {
