@@ -1,3 +1,5 @@
+# Java 多线程和线程同步
+
 #### 进程和线程
 
 - 进程和线程的区别？
@@ -26,7 +28,7 @@
 
 #### 多线程的使用
 
-- Thread 和 Runnable
+- Thread 和 Runnable，实际工作中不会使用
 
   ```java
   Thread thread = new Thread() {
@@ -78,7 +80,7 @@
 
   - 常用：newCachedThreadPool()
 
-    创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程
+    创建一个带缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程
 
     ```java
     Runnable runnable = new Runnable() {
@@ -103,10 +105,15 @@
     for(Bitmap bitmap: bitmaps){
         executor.execute(bitmapProcessor(bitmap));
     }
+    // 一次性批量操作，保守型结束
     executor.shutdown();
     ```
+    
+  - newSingleThreadExecutor() 单线程
 
-- Callable 和 Future
+  - newScheduleThreadPool() 
+
+- Callable 和 Future，不常用也比较难用
 
   Callable 接口类似于 Runnable，但是 Runnable 不会返回结果，并且无法抛出返回结果的异常，而 Callable功能更强大一些，被线程执行后，可以返回值，这个返回值可以被 Future 拿到，也就是说，Future 可以拿到异步执行任务的返回值。
 
@@ -142,6 +149,7 @@
   - synchronized 方法
 
     ```java
+    // monitor 默认是这个类
     private synchronized void count(int newValue) {
         x = newValue;
         y = newValue;
@@ -154,7 +162,11 @@
   - synchronized 代码块
 
     ```java
+    private final Object monitor1 = new Object();
+    private final Object monitor2 = new Object();
+    
     private void count(int newValue) {
+        // this 指的是 monitor
         synchronized (this) {
             x = newValue;
             y = newValue;
@@ -165,6 +177,7 @@
     }
     
     private void minus(int delta) {
+        // 分别指定 Monitor，互不干扰
         synchronized (monitor1) {
             x -= delta;
             y -= delta;
@@ -177,6 +190,12 @@
     - 保证方法内部或代码块内部资源（数据）的互斥访问，即同一时间，由同一个 Monitor 监视的代码，最多只能有一个线程在访问
     - 保证线程之间对监视资源的数据同步。即任何线程在获取到 Monitor 后的第一时间，会先将共享内存中的数据复制到自己的缓存中；任何线程在释放 Monitor 的第一时间，会先将缓存中的数据复制到共享内存中
 
+  - 死锁
+
+  - 乐观锁和悲观锁
+
+    - 乐观锁先不加锁，发现数据被改了才加锁
+
   - volatile
 
     - 保证加了 volatile 关键字的字段的操作具有原子性和同步性。其中原子性相当于实现了针对单一字段的线程间互斥访问。因为 volatile 可以看做事简化版的 synchronized 
@@ -184,7 +203,7 @@
 
   - java.util.concurrent.atomic 包
 
-    - 下面有 AtomicInteger、AtomicBoolean 等类，作用和 volatile 基本一致，可以看做是通用版的 volatile
+    - 下面有 AtomicInteger、AtomicBoolean、AtomicReference 等类，作用和 volatile 基本一致，可以看做是通用版的 volatile
 
       ```java
       AtomicInteger count = new AtomicInteger(0);
@@ -206,12 +225,14 @@
           lock.unlock();
       }
       ```
-    
+
     - 一般并不会只是使用 Lock，而是会使用更复杂的锁，例如 ReadWriteLock：
-    
+
       ```java
       ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+      // 读锁
       Lock readLock = lock.readLock();
+      // 写锁
       Lock writeLock = lock.writeLock();
       
       private int x = 0;
@@ -228,16 +249,16 @@
       private void print(int time) {
           readLock.lock();
           try {
-              for (int i = 0; i < time; i++) {
+            for (int i = 0; i < time; i++) {
               	System.out.print(x + " ");
-     		}
+       		}
           	System.out.println();
           } finally {
           	readLock.unlock();
           }
       }
       ```
-  
+
 - 线程安全问题的本质
 
   在多个线程访问共同的资源时，在某一线程对资源进行写操作的中途，其他线程对这个写了一半的资源进行了读操作，或者基于这个写了一半的资源进行了写操作，导致出现数据错误
