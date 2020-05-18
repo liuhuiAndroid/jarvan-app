@@ -186,12 +186,19 @@
 
     - 同样是加锁机制，但使用方式更灵活，同时也更麻烦一些
 
+      ```java
+      Lock lock = new ReentrantLock();
+      ...
+  lock.lock();
+      try{
+      x++;
+      } finally {
+          lock.unlock();
+      }
       ```
-      
-      ```
-
+    
     - 一般并不会只是使用 Lock，而是会使用更复杂的锁，例如 ReadWriteLock
-
+    
       ```java
       ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
       Lock readLock = lock.readLock();
@@ -213,21 +220,21 @@
           try {
               for (int i = 0; i < time; i++) {
               	System.out.print(x + " ");
-         		}
+     		}
           	System.out.println();
-          } finally {
+      } finally {
           	readLock.unlock();
-          }
       }
-      ```
-
-    - 线程安全问题的本质
-
+      }
+  ```
+    
+- 线程安全问题的本质
+    
       在多个线程访问共同的资源时，在某一线程对资源进行写操作的中途，其他线程对这个写了一半的资源进行了读操作，或者基于这个写了一半的资源进行了写操作，导致出现数据错误
-
+    
     - 锁机制的本质
-
+    
       通过对共享资源进行访问限制，让同一时间只有一个线程可以访问资源，保证了数据的准确性
-
+    
     - 不论是线程安全问题，还是针对线程安全问题所衍生出的锁机制，它们的核心都在于共享的资源，而不是某个方法或者某几行代码
 
