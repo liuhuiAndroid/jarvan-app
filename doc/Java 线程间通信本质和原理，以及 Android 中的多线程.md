@@ -1,10 +1,12 @@
+# 线程间通信的本质和原理
+
 #### 线程间交互
 
 - 一个线程启动别的线程：new Thread().start()、Executor.execute() 等
 - 一个线程终结另一个线程
   - Thread.stop()
   - Thread.interrupt()：温和式终结：不立即、不强制
-    - interrupted() 和 isInterrupted()：检查中断状态
+    - interrupted() 和 isInterrupted()：检查和重置中断状态
     - interruptedException：如果在线程等待时中断，或者在中断状态等待，直接结束等待过程（因为等待过程什么也不会做，而 interrupt() 的目的是让线程做完收尾工作后尽快终结，所以要跳过等待过程）
   - Object.wait() 和 Object.notify() / notifyAll()
     - 在未达到目标时 wait()
@@ -24,7 +26,7 @@
 
   - Thread 里 while 循环检查
   - 加上 Looper（优势在于自定义 Thread 的代码可以少些很多）
-  - 再加上 Handler（优势在于功能分拆，而且可以有多个 Handler）
+  - 再加上 Handler（优势在于功能拆分，而且可以有多个 Handler）
 
 - Java 的 Handler 机制：
 
@@ -50,7 +52,7 @@
 
     - 所以：
 
-      - AsyncTask 的内存泄漏，其他类型的线程方案（Thread、Executor、HandlerThread）一样都有，所以不要忽略它们，或者认为 AsyncTask 比别的方案更危险，并没有
+      - AsyncTask 的内存泄漏，其他类型的线程方案（Thread、Executor、HandlerThread）一样都有，所以不要忽略它们。认为 AsyncTask 比别的方案更危险，其实并没有
       - 就算是使用 AsyncTask，只要任务的时间不长（例如10秒之内），那就完全没必要做防止内存泄漏的处理 
 
 #### Service 和 IntentService
@@ -74,6 +76,7 @@
 ```java
 // 在 Activity 的 onDestory()
 executor.shutdown();
+// quit 其实就是停止 Looper 的循环
 handlerThread.quit();
 ```
 

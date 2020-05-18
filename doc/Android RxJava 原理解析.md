@@ -1,4 +1,4 @@
-#### RxJava
+# RxJava
 
 #### 框架结构
 
@@ -20,7 +20,7 @@ RxJava 的整体结构是一条链，其中：
 
 #### subscribeOn()
 
-原理：让 Scheduler 指定的 线程里启动 subscribe()
+原理：让 Scheduler 指定的线程里启动 subscribe()
 
 效果：
 

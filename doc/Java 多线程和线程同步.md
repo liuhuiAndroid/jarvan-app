@@ -195,7 +195,7 @@
 
     - 同样是加锁机制，但使用方式更灵活，同时也更麻烦一些
 
-      ```
+      ```java
       Lock lock = new ReentrantLock();
       // ...
       lock.lock();
