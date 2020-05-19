@@ -43,6 +43,20 @@
 - [Kotlin的Lambda表达式](https://kaixue.io/kotlin-lambda/)
 
 ### Jetpack
+
+- Android KTX
+
+- 数据绑定
+- Lifecycles
+- LiveData
+- Navigation
+- Paging
+- Room
+- ViewModel
+- WorkManager
+- ViewPager2
+- CameraX
+
 ### 设计模式
 ### 多线程和 Java IO（截止日期：2020-05-24）
 
