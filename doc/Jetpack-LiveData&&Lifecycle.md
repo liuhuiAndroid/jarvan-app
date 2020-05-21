@@ -334,5 +334,252 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
 
 #### LiveData 原理分析
 
-1. 
+1. 简单使用
 
+   ```kotlin
+       val liveString = MutableLiveData<String>()
+       liveString.observe(this, Observer { Log.d("TAG", "called : s = $it") })
+       liveString.postValue("LiveData")
+   ```
+
+2. LiveData.observe()
+
+   ```java
+       @MainThread
+       public void observe(@NonNull LifecycleOwner owner, @NonNull Observer<? super T> observer) {
+           assertMainThread("observe");
+           if (owner.getLifecycle().getCurrentState() == DESTROYED) {
+               // ignore 忽略 DESTROYED 状态
+               return;
+           }
+           // 把 Observer 用 LifecycleBoundObserver 包装起来
+           LifecycleBoundObserver wrapper = new LifecycleBoundObserver(owner, observer);
+           // 缓存
+           ObserverWrapper existing = mObservers.putIfAbsent(observer, wrapper);
+           // 如果已经 observe 过，并且两次的 owner 不同则报错
+           if (existing != null && !existing.isAttachedTo(owner)) {
+               throw new IllegalArgumentException("Cannot add the same observer"
+                       + " with different lifecycles");
+           }
+           if (existing != null) {
+               return;
+           }
+           // 绑定 owner
+           owner.getLifecycle().addObserver(wrapper);
+       }
+   ```
+
+3. LifecycleBoundObserver
+
+   ```java
+   class LifecycleBoundObserver extends ObserverWrapper implements LifecycleEventObserver {
+       @NonNull
+       final LifecycleOwner mOwner;
+   
+       LifecycleBoundObserver(@NonNull LifecycleOwner owner, Observer<? super T> observer) {
+           super(observer);
+           mOwner = owner;
+       }
+   
+       @Override
+       boolean shouldBeActive() {
+           // 判断 owner 当前的状态是否是至少 STARTED，认为是 active 状态
+           return mOwner.getLifecycle().getCurrentState().isAtLeast(STARTED);
+       }
+   
+       // 处理生命周期改变
+       @Override
+       public void onStateChanged(@NonNull LifecycleOwner source,
+                                  @NonNull Lifecycle.Event event) {
+           // 如果是 DESTROYED 就自动解除
+           if (mOwner.getLifecycle().getCurrentState() == DESTROYED) {
+               removeObserver(mObserver);
+               return;
+           }
+           activeStateChanged(shouldBeActive());
+       }
+   
+       @Override
+       boolean isAttachedTo(LifecycleOwner owner) {
+           return mOwner == owner;
+       }
+   
+       @Override
+       void detachObserver() {
+           mOwner.getLifecycle().removeObserver(this);
+       }
+   }
+   ```
+
+4. ObserverWrapper
+
+   ```java
+       private abstract class ObserverWrapper {
+           final Observer<? super T> mObserver;
+           boolean mActive;
+           int mLastVersion = START_VERSION;
+   
+           ObserverWrapper(Observer<? super T> observer) {
+               mObserver = observer;
+           }
+   
+           // 是否是 active 状态
+           abstract boolean shouldBeActive();
+   
+           boolean isAttachedTo(LifecycleOwner owner) {
+               return false;
+           }
+   
+           void detachObserver() {
+           }
+   
+           void activeStateChanged(boolean newActive) {
+               if (newActive == mActive) {
+                   return;
+               }
+               // immediately set active state, so we'd never dispatch anything to inactive
+               // owner
+               mActive = newActive;
+               boolean wasInactive = LiveData.this.mActiveCount == 0;
+               LiveData.this.mActiveCount += mActive ? 1 : -1;
+               if (wasInactive && mActive) {
+                   onActive();
+               }
+               if (LiveData.this.mActiveCount == 0 && !mActive) {
+                   onInactive();
+               }
+               // 如果是 active 状态下，则发送数据更新通知
+               if (mActive) {
+                   dispatchingValue(this);
+               }
+           }
+       }
+   ```
+
+5. 当我们调用 observe() 注册后，由于绑定了 owner，所以在 active 的情况下，LiveData 如果有数据，则 Observer 会立马接受到该数据修改的通知。
+
+   流程：observe --> onStateChanged --> activeStateChanged
+
+    --> dispatchingValue --> considerNotify --> onChanged
+
+   
+
+6. dispatchingValue 分析
+
+   ```java
+       // 分发事件逻辑的处理方法
+   	void dispatchingValue(@Nullable ObserverWrapper initiator) {
+           // 如果正在分发则直接返回
+           if (mDispatchingValue) {
+               // 标记分发失效
+               mDispatchInvalidated = true;
+               return;
+           }
+           // 标记分发开始
+           mDispatchingValue = true;
+           do {
+               mDispatchInvalidated = false;
+               // 生命周期改变调用的方法，initiator 不为 null
+               if (initiator != null) {
+                   considerNotify(initiator);
+                   initiator = null;
+               } else {
+                   // postValue/setValue 方法调用，传递的 initiator 为 null
+                   for (Iterator<Map.Entry<Observer<? super T>, ObserverWrapper>> iterator =
+                           mObservers.iteratorWithAdditions(); iterator.hasNext(); ) {
+                       considerNotify(iterator.next().getValue());
+                       if (mDispatchInvalidated) {
+                           break;
+                       }
+                   }
+               }
+           } while (mDispatchInvalidated);
+           // 标记分发结束
+           mDispatchingValue = false;
+       }
+   ```
+
+7. considerNotify 分析
+
+   ```java
+       // 确保了只将最新的数据分发给 active 状态下的 Observer
+   	private void considerNotify(ObserverWrapper observer) {
+           // 检查状态，确保不会分发给 inactive 的 observer
+           if (!observer.mActive) {
+               return;
+           }
+           if (!observer.shouldBeActive()) {
+               observer.activeStateChanged(false);
+               return;
+           }
+           // setValue 会增加 version，初始 version 为 -1
+           if (observer.mLastVersion >= mVersion) {
+               return;
+           }
+           observer.mLastVersion = mVersion;
+           // 引入了版本管理来管理数据以确保发送的数据总是最新的
+           observer.mObserver.onChanged((T) mData);
+       }
+   ```
+
+8. ObserverWrapper 不为 null 的情况
+
+   ```java
+       class LifecycleBoundObserver extends ObserverWrapper implements LifecycleEventObserver {
+           
+           @Override
+           public void onStateChanged(@NonNull LifecycleOwner source,
+                   @NonNull Lifecycle.Event event) {
+               activeStateChanged(shouldBeActive());
+           }
+   
+       }
+   
+       void activeStateChanged(boolean newActive) {
+           if (mActive) {
+           	// 调用了 dispatchingValue 方法，并传入了 this，进入分发通知逻辑
+               dispatchingValue(this);
+           }
+       }
+   ```
+
+9. ObserverWrapper 为 null 的情况：postValue /  setValue
+
+   ```java
+       protected void postValue(T value) {
+           boolean postTask;
+           synchronized (mDataLock) {
+               postTask = mPendingData == NOT_SET;
+               mPendingData = value;
+           }
+           if (!postTask) {
+               return;
+           }
+           // 把操作 post 到主线程
+           ArchTaskExecutor.getInstance().postToMainThread(mPostValueRunnable);
+       }
+   
+       private final Runnable mPostValueRunnable = new Runnable() {
+           @SuppressWarnings("unchecked")
+           @Override
+           public void run() {
+               Object newValue;
+               synchronized (mDataLock) {
+                   newValue = mPendingData;
+                   mPendingData = NOT_SET;
+               }
+               // 最后调用的还是 setValue 方法
+               setValue((T) newValue);
+           }
+       };
+   
+   	// setValue 必须是在主线程调用
+       @MainThread
+       protected void setValue(T value) {
+           assertMainThread("setValue");
+           mVersion++;
+           mData = value;
+           // 调用了 dispatchingValue 方法，并传入了 null，进入分发通知逻辑
+           dispatchingValue(null);
+       }
+   ```
