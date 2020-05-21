@@ -70,21 +70,93 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
 
   用来添加一个新数据源并相应地删除前一个数据源
 
+#### Lifecycle 重要角色
+
+- ##### LifeCycleOwner
+
+  生命周期拥有者，即Activity与Fragment
+
+  ```java
+  public class ComponentActivity implements LifecycleOwner{}
+  public class Fragment implements LifecycleOwner{}
+  ```
+
+  ```java
+  public interface LifecycleOwner {
+      // 只有一个方法，让拥有者获取 Lifecycle
+      Lifecycle getLifecycle();
+  }
+  ```
+
+- **LifeCycleObserver**
+
+  生命周期观察者，可以是任何类
+
 #### Lifecycle 原理分析
 
 1. 简单使用
 
    ```kotlin
-           lifecycle.addObserver(object : LifecycleObserver {
-               
-               @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-               fun onResume(){
-   
-               }
-           })
+       // LifeCycleOwner 和 LifeCycleObserver 建立联系
+       lifecycle.addObserver(object : LifecycleObserver {
+           @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+           fun onResume(){
+               Log.d("TAG", "LifecycleObserver onResume called");
+           }
+       })
    ```
 
-2. ReportFragment 重写了生命周期回调的方法，Lifecycle 利用 ReportFragment 来实现监听生命周期，并在生命周期回调里调用了内部 dispatch 的方法来分发生命周期事件
+   ```java
+       // 推荐使用 Java8 不使用注解的方式
+       // implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+       lifecycle.addObserver(object : DefaultLifecycleObserver {
+       	// 感知生命周期
+           override fun onResume(owner: LifecycleOwner) {
+   			Log.d("TAG", "LifecycleObserver onResume called");
+           }
+       })
+   ```
+
+2. Lifecycle 利用 ReportFragment 来实现监听生命周期，ReportFragment 重写了生命周期回调的方法，并在生命周期回调里调用了内部 dispatch 的方法来分发生命周期事件
+
+   ```java
+   public class ReportFragment extends Fragment {
+   
+       @Override
+       public void onStart() {
+           super.onStart();
+           dispatchStart(mProcessListener);
+           dispatch(Lifecycle.Event.ON_START);
+       }
+   
+       @Override
+       public void onResume() {
+           super.onResume();
+           dispatchResume(mProcessListener);
+           dispatch(Lifecycle.Event.ON_RESUME);
+       }
+   
+       private void dispatch(@NonNull Lifecycle.Event event) {
+           if (Build.VERSION.SDK_INT < 29) {
+               dispatch(getActivity(), event);
+           }
+       }
+       
+       static void dispatch(@NonNull Activity activity, @NonNull Lifecycle.Event event) {
+           if (activity instanceof LifecycleRegistryOwner) {
+               ((LifecycleRegistryOwner) activity).getLifecycle().handleLifecycleEvent(event);
+               return;
+           }
+   
+           if (activity instanceof LifecycleOwner) {
+               Lifecycle lifecycle = ((LifecycleOwner) activity).getLifecycle();
+               if (lifecycle instanceof LifecycleRegistry) {
+                   ((LifecycleRegistry) lifecycle).handleLifecycleEvent(event);
+               }
+           }
+       }
+   }
+   ```
 
 3. ComponentActivity#onCreate 方法注入了 ReportFragment，通过 Fragment 来实现生命周期监听
 
@@ -120,9 +192,31 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
 4. LifecycleRegistry#handleLifecycleEvent 方法接收事件
 
    ```java
+   // LifecycleRegistry 是 Lifecycle 的实现类，负责管理 Observer
    public class LifecycleRegistry extends Lifecycle {
+       // 
+       protected void onSaveInstanceState(@NonNull Bundle outState) {
+           Lifecycle lifecycle = getLifecycle();
+           // 把 Lifecycle 状态标记为 Lifecycle.State.CREATED
+           // 其余的操作都交给 ReportFragment 处理
+           if (lifecycle instanceof LifecycleRegistry) {
+               ((LifecycleRegistry) lifecycle).setCurrentState(Lifecycle.State.CREATED);
+           }
+           super.onSaveInstanceState(outState);
+           mSavedStateRegistryController.performSave(outState);
+       }
+       
+       // 
+       public void addObserver(@NonNull LifecycleObserver observer) {
+           State initialState = mState == DESTROYED ? DESTROYED : INITIALIZED;
+           ObserverWithState statefulObserver = new ObserverWithState(observer, initialState);
+           // 把 observer 维护到 ObserverWithState 然后装到 mObserverMap 里
+           ObserverWithState previous = mObserverMap.putIfAbsent(observer, statefulObserver);
+           // ... 
+       }
+       
    	// Sets the current state and notifies the observers.
-       // 处理状态并通知 observers
+       // 处理状态，遍历 mObserverMap 来通知 observers
        public void handleLifecycleEvent(@NonNull Lifecycle.Event event) {
            State next = getStateAfter(event);
            moveToState(next);
@@ -132,6 +226,7 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
            sync();
        }
        
+       // 对比了当前 mState 以及上一个 mState，判断是应该前移还是后退
        private void sync() {
            while (!isSynced()) {
                if (mState.compareTo(mObserverMap.eldest().getValue().mState) < 0) {
@@ -169,6 +264,20 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
                mLifecycleObserver.onStateChanged(owner, event);
            }
        }
+   }
+   
+   // 可以发现 mLifecycleObserver 其实是 ReflectiveGenericLifecycleObserver
+   static class ObserverWithState {
+       LifecycleEventObserver mLifecycleObserver;
+   
+       ObserverWithState(LifecycleObserver observer, State initialState) {
+           mLifecycleObserver = Lifecycling.lifecycleEventObserver(observer);
+       }
+   }
+   
+   @NonNul
+   static LifecycleEventObserver lifecycleEventObserver(Object object) {
+       return new ReflectiveGenericLifecycleObserver(object);
    }
    
    class ReflectiveGenericLifecycleObserver implements LifecycleEventObserver {
@@ -215,12 +324,12 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
    }
    ```
 
-6. 
-
 #### Lifecycle 实战应用
 
 - 自动移除 Handler 的消息：LifecycleHandler
 - 给 ViewHolder 添加 Lifecycle 的能力
 
+#### LiveData 原理分析
 
+1. 
 
