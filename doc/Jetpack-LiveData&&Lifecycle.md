@@ -46,3 +46,181 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
 
 [MVVM项目实战之路-搭建一个登录界面](<https://cloud.tencent.com/developer/article/1153469>)
 
+-------------
+
+[【AAC 系列二】深入理解架构组件的基石：Lifecycle](https://juejin.im/post/5cd81634e51d453af7192b87)
+
+[【AAC 系列三】深入理解架构组件：LiveData](https://juejin.im/post/5ce54c2be51d45106343179d)
+
+#### 具体使用
+
+- MutableLiveData
+
+  LiveData 的一个最简单实现，它可以接收数据更新并通知观察者
+
+- Transformations#map()
+
+  将数据从一个 LiveData 传递到另一个 LiveData
+
+- MediatorLiveData
+
+  将多个 LiveData 源数据集合起来
+
+- Transformations#switchMap
+
+  用来添加一个新数据源并相应地删除前一个数据源
+
+#### Lifecycle 原理分析
+
+1. 简单使用
+
+   ```kotlin
+           lifecycle.addObserver(object : LifecycleObserver {
+               
+               @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+               fun onResume(){
+   
+               }
+           })
+   ```
+
+2. ReportFragment 重写了生命周期回调的方法，Lifecycle 利用 ReportFragment 来实现监听生命周期，并在生命周期回调里调用了内部 dispatch 的方法来分发生命周期事件
+
+3. ComponentActivity#onCreate 方法注入了 ReportFragment，通过 Fragment 来实现生命周期监听
+
+   ```java
+   public class ComponentActivity implements LifecycleOwner{
+       
+       // 负责管理 Observer
+       private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
+       
+       @Override
+       protected void onCreate(@Nullable Bundle savedInstanceState) {
+           super.onCreate(savedInstanceState);
+           // 注入 ReportFragment
+           ReportFragment.injectIfNeededIn(this);
+       }
+       
+       @Override
+       protected void onSaveInstanceState(@NonNull Bundle outState) {
+           Lifecycle lifecycle = getLifecycle();
+           if (lifecycle instanceof LifecycleRegistry) {
+               ((LifecycleRegistry) lifecycle).setCurrentState(Lifecycle.State.CREATED);
+           }
+           super.onSaveInstanceState(outState);
+       }
+       
+       @Override
+       public Lifecycle getLifecycle() {
+           return mLifecycleRegistry;
+       }
+   }
+   ```
+
+4. LifecycleRegistry#handleLifecycleEvent 方法接收事件
+
+   ```java
+   public class LifecycleRegistry extends Lifecycle {
+   	// Sets the current state and notifies the observers.
+       // 处理状态并通知 observers
+       public void handleLifecycleEvent(@NonNull Lifecycle.Event event) {
+           State next = getStateAfter(event);
+           moveToState(next);
+       }
+       
+   	private void moveToState(State next) {
+           sync();
+       }
+       
+       private void sync() {
+           while (!isSynced()) {
+               if (mState.compareTo(mObserverMap.eldest().getValue().mState) < 0) {
+                   backwardPass(lifecycleOwner);
+               }
+               if (!mNewEventOccurred && newest != null
+                       && mState.compareTo(newest.getValue().mState) > 0) {
+                   forwardPass(lifecycleOwner);
+               }
+           }
+       }
+       
+       private void backwardPass(LifecycleOwner lifecycleOwner) {
+           Iterator<Entry<LifecycleObserver, ObserverWithState>> descendingIterator =
+                   mObserverMap.descendingIterator();
+           while (descendingIterator.hasNext() && !mNewEventOccurred) {
+               Entry<LifecycleObserver, ObserverWithState> entry = descendingIterator.next();
+               ObserverWithState observer = entry.getValue();
+               while ((observer.mState.compareTo(mState) > 0 && !mNewEventOccurred
+                       && mObserverMap.contains(entry.getKey()))) {
+                   Event event = downEvent(observer.mState);
+                   pushParentState(getStateAfter(event));
+                   // 重点，分发 Event 
+                   observer.dispatchEvent(lifecycleOwner, event);
+                   popParentState();
+               }
+           }
+       }
+       
+       static class ObserverWithState {
+           LifecycleEventObserver mLifecycleObserver;
+           
+           void dispatchEvent(LifecycleOwner owner, Event event) {
+               // 最终调到这里
+               mLifecycleObserver.onStateChanged(owner, event);
+           }
+       }
+   }
+   
+   class ReflectiveGenericLifecycleObserver implements LifecycleEventObserver {
+       private final CallbackInfo mInfo;
+       
+       ReflectiveGenericLifecycleObserver(Object wrapped) {
+           mWrapped = wrapped;
+           // 通过反射获取 method 信息
+           mInfo = ClassesInfoCache.sInstance.getInfo(mWrapped.getClass());
+       }
+       
+       @Override
+       public void onStateChanged(LifecycleOwner source, Event event) {
+           // 通过反射调用 method
+           mInfo.invokeCallbacks(source, event, mWrapped);
+       }
+   }
+   ```
+
+   我们在 Observer 用注解修饰的方法，会被通过反射的方式获取，并保存下来，然后在生命周期发生改变的时候再找到对应 Event 的方法，通过反射来调用方法。
+
+5. Lifecycle 的生命周期事件与状态的定义
+
+   ```java
+   public abstract class Lifecycle {
+       // 生命周期事件
+       public enum Event {
+           ON_CREATE,
+           ON_START,
+           ON_RESUME,
+           ON_PAUSE,
+           ON_STOP,
+           ON_DESTROY,
+           ON_ANY
+       }
+       // 当前组件的生命周期状态
+       public enum State {
+           DESTROYED,
+           INITIALIZED,
+           CREATED,
+           STARTED,
+           RESUMED;
+       }
+   }
+   ```
+
+6. 
+
+#### Lifecycle 实战应用
+
+- 自动移除 Handler 的消息：LifecycleHandler
+- 给 ViewHolder 添加 Lifecycle 的能力
+
+
+

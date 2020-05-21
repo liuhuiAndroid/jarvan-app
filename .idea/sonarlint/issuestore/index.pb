@@ -1,3 +1,21 @@
 
 @
 app/build.gradle,f\4\f4a01d6a4fcb971362ec00a83903fd3902f52164
+c
+3app/src/test/java/com/jarvan/app/ExampleUnitTest.kt,2\0\2063da223480f35175a80dab3e9370baa62cd288
+f
+6app/src/test/java/com/jarvan/app/CoroutinesUnitTest.kt,5\1\519a3c114520aa5ec820d8c6ea81be04e0e6e223
+b
+2app/src/test/java/com/jarvan/app/KotlinUnitTest.kt,d\0\d0375b9418959c68bc528806947bdc64b54a9fb2
+c
+3app/src/test/java/com/jarvan/app/FragmentKtxTest.kt,f\d\fd77005254f4313573ca670a6914fc4a9becfd19
+c
+3app/src/test/java/com/jarvan/app/ActivityKtxTest.kt,0\2\0247c72a44aa592685d7590c35ab412e94b235ed
+>
+app/.gitignore,5\1\51e1c5d383dfaa35e0e7e5873a0a99355a86880f
+_
+/app/src/test/java/com/jarvan/app/CoreKtxTest.kt,e\8\e839210049b60b95d1dba2ea755ae96cbdd78ea1
+n
+>app/src/main/java/com/jarvan/app/utilities/LifecycleHandler.kt,c\7\c77294c03205799dc11d1b3b7c70fd71cef688f8
+l
+<app/src/main/java/com/jarvan/app/ui/activity/MainActivity.kt,a\5\a51b81fff974a53bb2955d4cdb1b58aabdb71191

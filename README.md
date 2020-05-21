@@ -45,10 +45,10 @@
 ### Jetpack
 
 - Android KTX
-
 - 数据绑定
 - Lifecycles
 - LiveData
+- LiveEventBus
 - Navigation
 - Paging
 - Room
