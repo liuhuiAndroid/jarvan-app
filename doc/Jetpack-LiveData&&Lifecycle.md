@@ -50,6 +50,8 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
 
 [【AAC 系列二】深入理解架构组件的基石：Lifecycle](https://juejin.im/post/5cd81634e51d453af7192b87)
 
+[Android-Lifecycle超能解析](https://www.jianshu.com/p/2c9bcbf092bc)
+
 [【AAC 系列三】深入理解架构组件：LiveData](https://juejin.im/post/5ce54c2be51d45106343179d)
 
 #### 具体使用
@@ -109,7 +111,8 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
    ```java
        // 推荐使用 Java8 不使用注解的方式
        // implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-       lifecycle.addObserver(object : DefaultLifecycleObserver {
+       // If you use Java 8 language, always prefer it over annotations.
+   	lifecycle.addObserver(object : DefaultLifecycleObserver {
        	// 感知生命周期
            override fun onResume(owner: LifecycleOwner) {
    			Log.d("TAG", "LifecycleObserver onResume called");
@@ -315,11 +318,11 @@ MediatorLiveData 可以用于自定义转换，它可以添加或者移除原 Li
        }
        // 当前组件的生命周期状态
        public enum State {
-           DESTROYED,
            INITIALIZED,
            CREATED,
            STARTED,
            RESUMED;
+           DESTROYED,
        }
    }
    ```
