@@ -26,3 +26,12 @@ ViewModel 类也可以很好地与 LiveData 和 Data Binding 互相搭配使用�
 
 [《即学即用Android Jetpack - ViewModel & LiveData》](https://www.jianshu.com/p/81a284969f03)
 
+------------------------------------------------------------------------
+
+[【AAC 系列四】深入理解架构组件：ViewModel](https://juejin.im/post/5d0111c1e51d45108126d226)
+
+#### ViewModel 重要角色
+
+#### ViewModel 原理分析
+
+1. 
