@@ -1,6 +1,7 @@
 package com.jarvan.app.ui.activity
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
@@ -26,18 +27,10 @@ class MainActivity : BaseActivity() {
         val filePath = externalCacheDir?.absolutePath + "/test_jarvan.txt"
         writeEnv(File(filePath))
 
-        lifecycle.addObserver(object : LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            fun onResume(){
-
-            }
-        })
-
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onResume(owner: LifecycleOwner) {
-
-            }
-        })
+        val liveString = MutableLiveData<String>()
+        liveString.observe(this,
+            Observer { Log.d("TAG", "called : s = $it") })
+        liveString.postValue("程序")
     }
 
     private fun writeEnv(file: File) {

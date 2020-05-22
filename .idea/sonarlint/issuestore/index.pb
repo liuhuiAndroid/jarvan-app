@@ -19,3 +19,5 @@ n
 >app/src/main/java/com/jarvan/app/utilities/LifecycleHandler.kt,c\7\c77294c03205799dc11d1b3b7c70fd71cef688f8
 l
 <app/src/main/java/com/jarvan/app/ui/activity/MainActivity.kt,a\5\a51b81fff974a53bb2955d4cdb1b58aabdb71191
+f
+6app/src/main/java/com/jarvan/app/ui/AbsListFragment.kt,8\9\899b446abf01da394034435273ca1a61bcc20206
