@@ -30,8 +30,170 @@ ViewModel 类也可以很好地与 LiveData 和 Data Binding 互相搭配使用�
 
 [【AAC 系列四】深入理解架构组件：ViewModel](https://juejin.im/post/5d0111c1e51d45108126d226)
 
-#### ViewModel 重要角色
+[ViewModel 和 ViewModelProvider.Factory](https://blog.csdn.net/qq_43377749/article/details/100856599)
+
+#### ViewModel 简单使用
+
+```kotlin
+	// deprecated
+	ViewModelProviders.of(this).get(ShowHouseViewModel.class)
+	// API 变更
+	ViewModelProvider(this)[ShowHouseViewModel::class.java]
+```
+
+#### 使用 ViewModelProvider.NewInstanceFactory() 的好处
+
+默认的 ViewModelProvider.Factory 默认是用 ViewModel 的无参构造实例化 ViewModel。如果想在构造方法中添加参数，你必须编写自己的 ViewModelProvider 来创建 ViewModel 实例。
+
+ViewModelProviders.Factory 负责实例化 ViewModel 对象。
+
+如果你的 ViewModel 没有依赖项，这时你就不需要去自己创建 ViewModelProvider.Factory。可以使用系统自带的方法帮助你创建 ViewModel。
+
+```kotlin
+	private val showHouseViewModel: ShowHouseViewModel by viewModels {
+        CustomViewModelProvider.providerShowHouseViewModel()
+    }
+
+    object CustomViewModelProvider {
+
+        fun providerShowHouseViewModel(): ShowHouseViewModelFactory {
+            return ShowHouseViewModelFactory()
+        }
+    }
+
+    class ShowHouseViewModelFactory: ViewModelProvider.NewInstanceFactory() {
+
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return ShowHouseViewModel() as T
+        }
+    }
+```
 
 #### ViewModel 原理分析
 
-1. 
+1. ViewModelProvider(this)[ShowHouseViewModel::class.java]
+
+   ```java
+       public ViewModelProvider(@NonNull ViewModelStoreOwner owner) {
+           // 第一个参数是：ViewModelStore
+           this(owner.getViewModelStore(), owner instanceof HasDefaultViewModelProviderFactory
+                   ? ((HasDefaultViewModelProviderFactory) owner).getDefaultViewModelProviderFactory()
+                   : NewInstanceFactory.getInstance());
+       }
+   ```
+
+   其中：getDefaultViewModelProviderFactory 在 ComponentActivity 返回的是 SavedStateViewModelFactory，它持有 AndroidViewModelFactory
+
+   NewInstanceFactory 和 AndroidViewModelFactory 都是通过反射来构建 ViewModel 的工厂类，且都是个单例。
+
+2. ViewModel 的 class 是传给了 ViewModelProvider.get() 方法
+
+   ```java
+       public <T extends ViewModel> T get(@NonNull Class<T> modelClass) {
+           String canonicalName = modelClass.getCanonicalName();
+           if (canonicalName == null) {
+               throw new IllegalArgumentException("Local and anonymous classes can not be ViewModels");
+           }
+           // 每个 ViewModel 类都有一个唯一的 key
+           return get(DEFAULT_KEY + ":" + canonicalName, modelClass);
+       }
+   
+       public <T extends ViewModel> T get(@NonNull String key, @NonNull Class<T> modelClass) {
+           // 通过 key 尝试先从 ViewModelStore 中获取 ViewModel 的实例
+           // ViewModelStore 负责存储 ViewModel
+           ViewModel viewModel = mViewModelStore.get(key);
+   
+           if (modelClass.isInstance(viewModel)) {
+               if (mFactory instanceof OnRequeryFactory) {
+                   ((OnRequeryFactory) mFactory).onRequery(viewModel);
+               }
+               return (T) viewModel;
+           } else {
+               //noinspection StatementWithEmptyBody
+               if (viewModel != null) {
+                   // TODO: log a warning.
+               }
+           }
+           // 通过 Factory 去创建 ViewModel 实例
+           if (mFactory instanceof KeyedFactory) {
+               viewModel = ((KeyedFactory) (mFactory)).create(key, modelClass);
+           } else {
+               viewModel = (mFactory).create(modelClass);
+           }
+           // 把新的 ViewModel 实例存入到 ViewModelStore
+           mViewModelStore.put(key, viewModel);
+           return (T) viewModel;
+       }
+   ```
+
+3. owner.getViewModelStore()
+
+   ```java
+   public interface ViewModelStoreOwner {
+       @NonNull
+       ViewModelStore getViewModelStore();
+   }
+   ```
+
+4. 查看 ViewModelStoreOwner 实现
+
+   ```java
+   public class ComponentActivity{
+   
+       	// ViewModelStore 相关的数据都会通过这个类进行保存，以免被销毁
+           static final class NonConfigurationInstances {
+               Object custom;
+               ViewModelStore viewModelStore;
+           }
+       
+           // Lazily recreated from NonConfigurationInstances by getViewModelStore()
+           private ViewModelStore mViewModelStore;
+       
+      		// 在配置改变时保存需要的实例
+           public final Object onRetainNonConfigurationInstance() {
+               Object custom = onRetainCustomNonConfigurationInstance();
+   
+               ViewModelStore viewModelStore = mViewModelStore;
+               if (viewModelStore == null) {
+                   // No one called getViewModelStore(), so see if there was an existing
+                   // ViewModelStore from our last NonConfigurationInstance
+                   NonConfigurationInstances nc =
+                           (NonConfigurationInstances) getLastNonConfigurationInstance();
+                   if (nc != null) {
+                       viewModelStore = nc.viewModelStore;
+                   }
+               }
+   
+               if (viewModelStore == null && custom == null) {
+                   return null;
+               }
+   
+               NonConfigurationInstances nci = new NonConfigurationInstances();
+               nci.custom = custom;
+               nci.viewModelStore = viewModelStore;
+               return nci;
+           }
+       
+           public ViewModelStore getViewModelStore() {
+           if (getApplication() == null) {
+               throw new IllegalStateException("Your activity is not yet attached to the "
+                       + "Application instance. You can't request ViewModel before onCreate call.");
+           }
+           if (mViewModelStore == null) {
+               NonConfigurationInstances nc =
+                       (NonConfigurationInstances) getLastNonConfigurationInstance();
+               if (nc != null) {
+                   // Restore the ViewModelStore from NonConfigurationInstances
+                   mViewModelStore = nc.viewModelStore;
+               }
+               if (mViewModelStore == null) {
+                   mViewModelStore = new ViewModelStore();
+               }
+           }
+           return mViewModelStore;
+       }
+       
+   }
+   ```
+
+   总结一下就是利用 onRetainNonConfigurationInstance() 方法在旋转屏幕时保存 ViewModelStore 实例，并在重新创建时重新赋值。
