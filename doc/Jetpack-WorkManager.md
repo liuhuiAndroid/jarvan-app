@@ -138,3 +138,56 @@ WorkManager 使用场景 TODO
 
 WorkManager 架构图 TODO 
 
+-  JobScheduler
+
+  [参考：安卓电量优化之JobScheduler使用介绍](https://www.cnblogs.com/leipDao/p/8268918.html)
+
+  JobScheduler 是安卓5.0版本推出的API，允许开发者在符合某些条件时创建执行在后台的任务。与AlarmManager 不同的是这个执行时间是不确定的。JobScheduler API 允许同时执行多个任务。
+
+  JobSchedule 的宗旨就是把一些不是特别紧急的任务放到更合适的时机批量处理。这样做有两个好处：避免频繁的唤醒硬件模块，造成不必要的电量消耗以及避免在不合适的时间(例如低电量情况下、弱网络或者移动网络情况下的)执行过多的任务消耗电量。
+
+  ```java
+  public class TestJobService extends JobService {
+  
+      // 任务开始
+      @Override
+      public boolean onStartJob(JobParameters params) {
+          // 返回值是 false,系统假设这个方法返回时任务已经执行完毕
+          // 返回值是 true,那么系统假定这个任务正要被执行，当任务执行完毕时开发者需要自己调用jobFinished 来通知系统。
+          return false;
+      }
+  
+      // 取消任务
+      @Override
+      public boolean onStopJob(JobParameters params) {
+          return false;
+      }
+  }
+  ```
+
+  需要到 AndroidManifest.xml 中添加一个service节点让你的应用拥有绑定和使用这个 JobService 的权限
+
+  ```xml
+  <service
+      android:name=".TestJobService"
+      android:permission="android.permission.BIND_JOB_SERVICE" >
+  </service>
+  ```
+
+  ```java
+  // 创建JobScheduler对象
+  JobScheduler tm =(JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  
+  ComponentName mServiceComponent = new ComponentName(this, TestJobService.class);
+  // 第一个参数是你要运行的任务的标识符，第二个是这个 Service 组件的类名
+  JobInfo.Builder builder = new JobInfo.Builder(kJobId++, mServiceComponent);
+  ```
+
+- AlarmManager
+
+  系统提供的一个定时任务管理器。
+
+  Timer 类也是安卓开发中常用到的一个定时器类，但是Timer只能在手机运行的时候使用，也就是说在手机休眠（黑屏）的情况下是没有作用的，但是 AlarmManager 是系统的一个类，它能在手机休眠的情况下也能够运行。
+
+  
+
