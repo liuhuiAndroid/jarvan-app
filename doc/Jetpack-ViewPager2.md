@@ -1,6 +1,18 @@
-ViewPager2 比 ViewPager 好处
+#### ViewPager2 与 ViewPager 比较
 
-TabLayout 结合 ViewPager2
+ViewPager2 的核心实现就是 RecyclerView + LinearLayoutManager
+
+ViewPager 的弊端：
+
+1. 不能关闭预加载
+
+ViewPager2 的优势：
+
+1. 默认是开启预加载，关闭离屏加载
+
+#### ViewPager2 简单使用
+
+#### TabLayout 结合 ViewPager2
 
 ```java
 	//限制页面预加载
@@ -36,4 +48,14 @@ TabLayout 结合 ViewPager2
     //切换到默认选择项,那当然要等待初始化完成之后才有效
     viewPager2.post(() -> viewPager2.setCurrentItem(tabConfig.select, false));
 ```
+
+#### ViewPager2 源码分析
+
+
+
+#### 参考
+
+[views-widgets-samples](https://github.com/android/views-widgets-samples)
+
+[深入了解ViewPager2](https://zhuanlan.zhihu.com/p/97511079?from_voters_page=true)
 

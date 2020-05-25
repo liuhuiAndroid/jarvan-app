@@ -90,4 +90,6 @@ dependencies {
     implementation "androidx.collection:collection-ktx:1.1.0"
     implementation "androidx.fragment:fragment-ktx:1.2.4"
     implementation "androidx.activity:activity-ktx:1.1.0"
+
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
 }

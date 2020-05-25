@@ -21,3 +21,9 @@ l
 <app/src/main/java/com/jarvan/app/ui/activity/MainActivity.kt,a\5\a51b81fff974a53bb2955d4cdb1b58aabdb71191
 f
 6app/src/main/java/com/jarvan/app/ui/AbsListFragment.kt,8\9\899b446abf01da394034435273ca1a61bcc20206
+l
+<app/src/main/java/com/jarvan/app/ui/fragment/HomeFragment.kt,a\4\a4ac0d68f5853fd1dce02097a54921ef7f5e0e45
+n
+>app/src/main/java/com/jarvan/app/ui/activity/SplashActivity.kt,a\9\a9ebda632839b9351a0c946085e99b2169067cdf
+u
+Eapp/src/main/java/com/jarvan/app/viewmodels/NotificationsViewModel.kt,1\1\11e507d569745ca1157deec8113a4b2e7e587a4f
