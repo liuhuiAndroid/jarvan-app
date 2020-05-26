@@ -175,23 +175,23 @@ ViewModelProviders.Factory 负责实例化 ViewModel 对象。
            }
        
            public ViewModelStore getViewModelStore() {
-           if (getApplication() == null) {
-               throw new IllegalStateException("Your activity is not yet attached to the "
-                       + "Application instance. You can't request ViewModel before onCreate call.");
-           }
-           if (mViewModelStore == null) {
-               NonConfigurationInstances nc =
-                       (NonConfigurationInstances) getLastNonConfigurationInstance();
-               if (nc != null) {
-                   // Restore the ViewModelStore from NonConfigurationInstances
-                   mViewModelStore = nc.viewModelStore;
+               if (getApplication() == null) {
+                   throw new IllegalStateException("Your activity is not yet attached to the "
+                           + "Application instance. You can't request ViewModel before onCreate call.");
                }
                if (mViewModelStore == null) {
-                   mViewModelStore = new ViewModelStore();
+                   NonConfigurationInstances nc =
+                           (NonConfigurationInstances) getLastNonConfigurationInstance();
+                   if (nc != null) {
+                       // Restore the ViewModelStore from NonConfigurationInstances
+                       mViewModelStore = nc.viewModelStore;
+                   }
+                   if (mViewModelStore == null) {
+                       mViewModelStore = new ViewModelStore();
+                   }
                }
-           }
-           return mViewModelStore;
-       }
+               return mViewModelStore;
+       	}
        
    }
    ```
