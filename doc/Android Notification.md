@@ -6,6 +6,7 @@
       fun setLocalNotification(context: Context) {
           val notificationManager =
               context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+          val pendingIntent = PendingIntent.getBroadcast(context, 0, Intent(), 0)
           var notification: Notification
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
               val channelId = "channel_vr" // 渠道id
@@ -41,6 +42,7 @@
                           R.mipmap.ic_launcher
                       )
                   )
+                  .setContentIntent(pendingIntent)
                   // 设置时间
                   .setWhen(System.currentTimeMillis())
                   // 添加默认声音提醒、默认震动提醒和默认呼吸灯提醒
@@ -64,6 +66,7 @@
                           R.mipmap.ic_launcher
                       )
                   )
+                  .setContentIntent(pendingIntent)
                   // 设置时间
                   .setWhen(System.currentTimeMillis())
                   // 添加默认声音提醒、默认震动提醒和默认呼吸灯提醒
