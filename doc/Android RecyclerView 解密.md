@@ -1,3 +1,39 @@
+#### RecyclerView最好的伙伴：AsyncListDiffer
+
+用于优化 RecyclerView 刷新效率，AsyncListDiffer 比 DiffUtil 更新
+
+#### 自定义 LayoutManager
+
+重写 smoothScrollToPosition 方法配合 SmoothScroller 可以控制滚动位置和滚动速度
+
+#### SortedList 使用
+
+如果列表需要排序的话，可以使用这个集合来代替，比较方便和高效。
+
+```kotlin
+private val dataList =
+SortedList<String>(String::class.java, object : SortedListAdapterCallback<String>(this) {
+    // 比较两个Item的内容是否一致，如不一致则会调用adapter的notifyItemChanged()
+    override fun areItemsTheSame(item1: String?, item2: String?): Boolean = false
+
+    // 用于排序，大于0升序，小于0降序，等于0不变
+    override fun compare(o1: String?, o2: String?): Int = 0
+
+    // 两个Item是不是同一个，可以用他们的id，或者其他的字段进行比较是否一样
+    override fun areContentsTheSame(oldItem: String?, newItem: String?): Boolean = true
+})
+```
+
+批量更新和删除
+
+```kotlin
+// 调用beginBatchedUpdates()之后，所有的对SortedList操作都会等到endBatchedUpdates()之后一起生效。
+dataList.beginBatchedUpdates();  // 开始批量更新
+dataList.addAll(items);          // 更新一批数据
+dataList.remove(item);           // 删除一批数据
+dataList.endBatchedUpdates();    // 结束更新
+```
+
 #### 预取 Prefetch
 
  [RecyclerView 数据预取](https://juejin.im/entry/58a3f4f62f301e0069908d8f)
