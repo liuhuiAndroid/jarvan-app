@@ -18,6 +18,9 @@ import org.kodein.di.generic.singleton
 import timber.log.Timber
 import java.io.File
 
+/**
+ * ajin233333
+ */
 class JarvanApplication : Application(), KodeinAware {
 
     override fun onCreate() {
